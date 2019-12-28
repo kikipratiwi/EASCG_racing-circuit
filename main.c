@@ -18,16 +18,16 @@
 #define GL_CLAMP_TO_EDGE 0x812F
 #endif
 
-int mode=0;       //  Projection mode
-int th=110;         //  Azimuth of view angle
-int ph=0;         //  Elevation of view angle
-int fov=55;       //  Field of view (for perspective)
-double asp=1.333;  //  Aspect ratio
-double dim=8;   //  Size of world
+int mode	=	0;      //  Projection mode
+int th		=	110;    //  Azimuth of view angle
+int ph		=	0;      //  Elevation of view angle
+int fov		=	55;     //  Field of view (for perspective)
+double asp	=	1.333;  //  Aspect ratio
+double dim	=	8;   	//  Size of world
 
 // Light values
 int one       =   1;  // Unit value
-int distance  =   25;  // Light distance
+int distance  =   25; // Light distance
 int local     =   0;  // Local Viewer Model
 int emission  =  30;  // Emission intensity (%)
 int ambient   =  80;  // Ambient intensity (%)
@@ -61,9 +61,13 @@ GLuint	_textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
 		_textureWoodBeam, _textureFrontDoor2, _textureWindow1, _textureSkyboxFront, 
 		_textureSkyboxBack, _textureSkyboxRight, _textureSkyboxLeft, _textureSkyboxTop, 
 		_textureAsphalt, _textureBrownBrick, _textureWhiteBrick, _textureMetalRoof, 
-		_textureWarehouseWindow, _textureSupport;
+		_textureWarehouseWindow, _textureSupport
 ;
 
+
+/*
+ *  GLUT calls this routine at the first time to load the texture
+ */
 void initTexture() {
 	_textureSkyboxFront = LoadTexBMP("texture/skybox-front.bmp");
 	_textureSkyboxBack = LoadTexBMP("texture/skybox-back.bmp");
@@ -71,134 +75,144 @@ void initTexture() {
 	_textureSkyboxLeft = LoadTexBMP("texture/skybox-left.bmp");
 	_textureSkyboxTop = LoadTexBMP("texture/skybox-top.bmp");
 	_textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
-	_textureSupport = LoadTexBMP("texture/support.bmp");;
 }
 
 static void cube(double x,double y,double z,
                  double dx,double dy,double dz,
-                 double th)
-{
-   //  Save transformation
+                 double th) {
+   //  Save transformation ===============================================================================================
    glPushMatrix();
-   //  Offset, scale and rotate
-   glTranslated(x,y,z);
-   glRotated(th,0,1,0);
-   glScaled(dx,dy,dz);
-
-   //Texture repitition values
-   float texRepX = 1.0;
-   float texRepY = 1.0;
-
-   //  Cube
-   glBegin(GL_QUADS);
-   //  Front
-   texRepX = dx/texScale;
-   texRepY = dy/texScale;
-   glNormal3f( 0, 0, 1);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
-   //  Back
-   texRepX = dx/texScale;
-   texRepY = dy/texScale;
-   glNormal3f( 0, 0,-1);
-   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
-   //  Right
-   texRepX = dz/texScale;
-   texRepY = dy/texScale;
-   glNormal3f(+1, 0, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,+1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,+1);
-   //  Left
-   texRepX = dz/texScale;
-   texRepY = dy/texScale;
-   glNormal3f(-1, 0, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,+1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,+1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
-   //  Top
-   texRepX = dx/texScale;
-   texRepY = dz/texScale;
-   glNormal3f( 0,+1, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
-   //  Bottom
-   texRepX = dx/texScale;
-   texRepY = dz/texScale;
-   glNormal3f( 0,-one, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
-   //  End
-   glEnd();
-   //  Undo transofrmations
+	   //  Offset, scale and rotate
+	   glTranslated(x,y,z);
+	   glRotated(th,0,1,0);
+	   glScaled(dx,dy,dz);
+	
+	   //Texture repitition values
+	   float texRepX = 1.0;
+	   float texRepY = 1.0;
+	
+	   //  Cube ==============================================================================================================
+	   glBegin(GL_QUADS);
+		   //  Front
+		   texRepX = dx/texScale;
+		   texRepY = dy/texScale;
+		   glNormal3f( 0, 0, 1);
+		   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
+		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
+		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
+		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
+		   
+		   //  Back
+		   texRepX = dx/texScale;
+		   texRepY = dy/texScale;
+		   glNormal3f( 0, 0,-1);
+		   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
+		   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
+		   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
+		   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
+		   
+		   //  Right
+		   texRepX = dz/texScale;
+		   texRepY = dy/texScale;
+		   glNormal3f(+1, 0, 0);
+		   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,+1);
+		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+		   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,+1);
+		   
+		   //  Left
+		   texRepX = dz/texScale;
+		   texRepY = dy/texScale;
+		   glNormal3f(-1, 0, 0);
+		   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+		   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,+1);
+		   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,+1);
+		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+		   
+		   //  Top
+		   texRepX = dx/texScale;
+		   texRepY = dz/texScale;
+		   glNormal3f( 0,+1, 0);
+		   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
+		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
+		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+		   
+		   //  Bottom
+		   texRepX = dx/texScale;
+		   texRepY = dz/texScale;
+		   glNormal3f( 0,-one, 0);
+		   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
+		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
+		   
+	   //  End of Cube ====================================================================================================
+	   glEnd();
+	   
+   //  Undo transofrmations ===============================================================================================
    glPopMatrix();
 }
 
 static void skybox(float dim) {
+   // front
    glBindTexture(GL_TEXTURE_2D,_textureSkyboxFront);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glBegin(GL_QUADS);
-   glNormal3f(0, 0, -1);
-   glTexCoord2f(1.0,0.0); glVertex3f(+dim,-dim, dim);
-   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, dim);
-   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, dim);
-   glTexCoord2f(1.0,1.0); glVertex3f(+dim,+dim, dim);
+	   glNormal3f(0, 0, -1);
+	   glTexCoord2f(1.0,0.0); glVertex3f(+dim,-dim, dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(+dim,+dim, dim);
    glEnd();
 
+   // back
    glBindTexture(GL_TEXTURE_2D,_textureSkyboxBack);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glBegin(GL_QUADS);
-   glNormal3f(0, 0, 1);
-   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, -dim);
-   glTexCoord2f(0.0,0.0); glVertex3f(+dim,-dim, -dim);
-   glTexCoord2f(0.0,1.0); glVertex3f(+dim,+dim, -dim);
-   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, -dim);
+	   glNormal3f(0, 0, 1);
+	   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, -dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(+dim,-dim, -dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(+dim,+dim, -dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, -dim);
    glEnd();
 
+   // right
    glBindTexture(GL_TEXTURE_2D,_textureSkyboxRight);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glBegin(GL_QUADS);
-   glNormal3f(-1, 0, 0);
-   glTexCoord2f(1.0,0.0); glVertex3f(dim,-dim, -dim);
-   glTexCoord2f(0.0,0.0); glVertex3f(dim,-dim, +dim);
-   glTexCoord2f(0.0,1.0); glVertex3f(dim,+dim, +dim);
-   glTexCoord2f(1.0,1.0); glVertex3f(dim,+dim, -dim);
+	   glNormal3f(-1, 0, 0);
+	   glTexCoord2f(1.0,0.0); glVertex3f(dim,-dim, -dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(dim,-dim, +dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(dim,+dim, +dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(dim,+dim, -dim);
    glEnd();
 
+   // left
    glBindTexture(GL_TEXTURE_2D,_textureSkyboxLeft);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glBegin(GL_QUADS);
-   glNormal3f(1, 0, 0);
-   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, +dim);
-   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, -dim);
-   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, -dim);
-   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, +dim);
+	   glNormal3f(1, 0, 0);
+	   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, +dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, -dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, -dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, +dim);
    glEnd();
 
+   // top
    glBindTexture(GL_TEXTURE_2D,_textureSkyboxTop);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glBegin(GL_QUADS);
-   glNormal3f(0, -1, 0);
-   glTexCoord2f(1.0,0.0); glVertex3f(+dim,dim, +dim);
-   glTexCoord2f(0.0,0.0); glVertex3f(-dim,dim, +dim);
-   glTexCoord2f(0.0,1.0); glVertex3f(-dim,dim, -dim);
-   glTexCoord2f(1.0,1.0); glVertex3f(+dim,dim, -dim);
+	   glNormal3f(0, -1, 0);
+	   glTexCoord2f(1.0,0.0); glVertex3f(+dim,dim, +dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,dim, +dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,dim, -dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(+dim,dim, -dim);
    glEnd();
 }
 
@@ -212,22 +226,25 @@ void display()
    //  Enable Z-buffering in OpenGL
    glEnable(GL_DEPTH_TEST);
 
-   //Enable Textures
+   //  Enable Textures
    glEnable(GL_TEXTURE_2D);
 
    //  Undo previous transformations
    glLoadIdentity();
    
-   // Light Position (Sun)
+   //  Light Position (Sun)
    float Position[]  = {0 ,25 ,0,1.0};
    
    //  Enable lighting
    glEnable(GL_LIGHTING);
+   
    //  Location of viewer for specular calculations
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+
    //  glColor sets ambient and diffuse color materials
    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
    glEnable(GL_COLOR_MATERIAL);
+
     //  Enable light 0 - Sun
    glEnable(GL_LIGHT0);
    
@@ -237,7 +254,6 @@ void display()
    glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
    glLightfv(GL_LIGHT0,GL_POSITION,Position);
 
-	
    //  Perspective - set eye position
    if (mode)
    {
@@ -247,6 +263,7 @@ void display()
       
       gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
    }
+   
    //  First Person
    else
    {
@@ -256,8 +273,8 @@ void display()
       gluLookAt(0,1,1, refX,refY,refZ, 0,1,0);
    }
 
-   //Draw scene
-   //Skybox
+   //  Draw scene =========================================================================================================
+   //  Skybox
    skybox(64);
    
    glutSwapBuffers();
@@ -341,19 +358,23 @@ int main(int argc,char* argv[])
 {
    //  Initialize GLUT
    glutInit(&argc,argv);
+   
    //  Request double buffered, true color window with Z buffering at 600x600
    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
    glutInitWindowSize(800,600);
    glutCreateWindow("EAS 171511046");
+   
    //  Set callbacks
    glutDisplayFunc(display);
    glutReshapeFunc(reshape);
    glutSpecialFunc(special);
    glutKeyboardFunc(key);
    
+   // load the texture
    initTexture();
    
    glutIdleFunc(idle);
+   
    //  Pass control to GLUT so it can interact with the user
    ErrCheck("init");
    glutMainLoop();
