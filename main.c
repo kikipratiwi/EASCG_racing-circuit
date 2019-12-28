@@ -98,6 +98,28 @@ void initTexture() {
 	_textureDiffuse = LoadTexBMP("texture/diffuse.bmp");  
 }
 
+static void createZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
+	glEnable(GL_TEXTURE_2D);
+	    glBegin(GL_QUADS);
+	        glVertex3f(x1, y1, z1); // top left
+	        glVertex3f(x2, y1, z1); // top right
+	        glVertex3f(x2, y2, z2); // bottom right
+	        glVertex3f(x1, y2, z2); // bottom left
+	    glEnd();
+    glDisable(GL_TEXTURE_2D);
+}
+
+static void createXYBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
+	glEnable(GL_TEXTURE_2D);
+	    glBegin(GL_QUADS);
+	        glVertex3f(x1, y1, z1); // top left
+	        glVertex3f(x1, y1, z2); // top right
+	        glVertex3f(x2, y2, z2); // bottom right
+	        glVertex3f(x2, y2, z1); // bottom left
+	    glEnd();
+    glDisable(GL_TEXTURE_2D);
+}
+
 static void home() {
    
     /* =============================================Grass========================================= */
