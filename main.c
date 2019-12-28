@@ -98,7 +98,7 @@ void initTexture() {
 	_textureDiffuse = LoadTexBMP("texture/diffuse.bmp");  
 }
 
-static void createZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
+static void drawZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
 	glEnable(GL_TEXTURE_2D);
 	    glBegin(GL_QUADS);
 	        glVertex3f(x1, y1, z1); // top left
@@ -109,7 +109,7 @@ static void createZBaseRectangle(float x1, float y1, float z1, float x2, float y
     glDisable(GL_TEXTURE_2D);
 }
 
-static void createXYBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
+static void drawXYBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
 	glEnable(GL_TEXTURE_2D);
 	    glBegin(GL_QUADS);
 	        glVertex3f(x1, y1, z1); // top left
@@ -120,7 +120,7 @@ static void createXYBaseRectangle(float x1, float y1, float z1, float x2, float 
     glDisable(GL_TEXTURE_2D);
 }
 
-static void home() {
+static void drawHome() {
    
     /* =============================================Grass========================================= */
     glPushMatrix();
