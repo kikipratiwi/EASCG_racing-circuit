@@ -26,12 +26,14 @@
 #define ROAD_WIDTH 5
 #define ROAD_LONG 1
 #define ROAD_THICK 0.3
-#define NUM_ROAD_PARAMS 6
+#define NUM_ROAD_PARAMS 7
 #define COUNT_ARRAY_ELEMENT(x)  (sizeof(x) / sizeof((x)[0]))
 #define CUBE_TOP_LEFT 1
 #define CUBE_TOP_RIGHT 2
 #define CUBE_BOTTOM_LEFT 3
 #define CUBE_BOTTOM_RIGHT 4
+#define ROAD 1
+#define SIDEWALK 2
 
 //Road struct
 typedef struct Roads{
@@ -42,20 +44,27 @@ typedef struct Roads{
           degree;
 }Road;
 
-//int mode=0;       //  Projection mode
-//int th=-95;         //  Azimuth of view angle
-//int ph=15;         //  Elevation of view angle
-//int fov=35;       //  Field of view (for perspective)
 
-double fpX = 0;
-double fpY = 0.7;
-double fpZ = 0;
+
+//int mode=0;       //  Projection mode
+//int th=110;         //  Azimuth of view angle
+//int ph=0;         //  Elevation of view angle
+//int fov=55;       //  Field of view (for perspective)
+
+int mode=0;       //  Projection mode
+int th=105;         //  Azimuth of view angle
+int ph=0;         //  Elevation of view angle
+int fov=55;       //  Field of view (for perspective)
+
+//double fpX = 0;
+//double fpY = 0.7;
+//double fpZ = 0;
 //heli view---------------------------------
-int mode=1;       //  Projection mode
-int th=0;         //  Azimuth of view angle
-int fov=143;       //  Field of view (for perspective)
-//int fov=112;       //  Field of view (for perspective)
-int ph=90;         //  Elevation of view angle
+//int mode=1;       //  Projection mode
+//int th=0;         //  Azimuth of view angle
+//int fov=143;       //  Field of view (for perspective)
+////int fov=112;       //  Field of view (for perspective)
+//int ph=90;         //  Elevation of view angle
 //------------------------------------------
 int move=1;       //  Move light
 int axes=0;       //  Display axes
@@ -85,9 +94,9 @@ int at2=20;        //  Quadratic attenuation %
 double fpMoveInc = 0.02; //Multiplier for how much to move each keystroke in FP mode
 
 //First person camera location
-//double fpX = 0;
-//double fpY = 0.7;
-//double fpZ = -0.3;
+double fpX = 0;
+double fpY = 0.8;
+double fpZ = -0.3;
 
 //x, y, z for refrence point in glLookAt() for FP mode
 double refX = 5;
@@ -117,14 +126,28 @@ double circuit[] = {
     
     
 //     tx,  ty, tz,  roadLong, degree, rotate pivot
-    20,        0, (30-20),   21,   0, 0,                 //1   
-    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, //2
-    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, //3
-     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT,     //4
-     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT,     //5
-     -10.4,     0, (4.0),    15.45,   0, 0,                 //6
-     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT,     //7
-     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT      //8
+    20,        0, (30-20),   21,   0, 0, ROAD,                //1   
+    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, ROAD, //2
+    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, ROAD, //3
+     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT, ROAD,     //4
+     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT, ROAD,     //5
+     -10.4,     0, (4.0),    15.45,   0, 0, ROAD,                 //6
+     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT, ROAD,     //7
+     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT, ROAD,      //8
+};
+
+double sidewalk[] = {
+    
+    
+//     tx,  ty, tz,  roadLong, degree, rotate pivot
+    20,        0, (30-20),   21,   0, 0, SIDEWALK,                //1   
+    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, SIDEWALK, //2
+    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, SIDEWALK, //3
+     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT, SIDEWALK,     //4
+     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT, SIDEWALK,     //5
+     -10.4,     0, (4.0),    15.45,   0, 0, SIDEWALK,                 //6
+     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT, SIDEWALK,     //7
+     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT, SIDEWALK,      //8
 };
 
 size_t circuitSize = COUNT_ARRAY_ELEMENT(circuit);
@@ -146,6 +169,16 @@ GLuint    _textureBrick, _textureFence, _textureStone, _textureConcrete,
 int refreshMills = 15;
 unsigned int ID;
 float _angle = 0.0;
+
+
+float centerXIncrement = 0;
+float centerZIncrement = 0;
+float xRotate = 0.5;
+float zRotate = 0;
+float carRotate2 = 0;
+float temp;
+
+
 
 /*
  *  GLUT calls this routine at the first time to load the texture
@@ -177,6 +210,7 @@ void initTexture() {
     _textureSupport = LoadTexBMP("texture/support.bmp");
     
     _textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
+    _textureSidewalk = LoadTexBMP("texture/sidewalk.bmp");
 }
 
 static void drawZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -941,9 +975,10 @@ static void pitstop(double x, double y, double z)
   
 }
 
-static void straightRoad(double tx, double ty, double tz, double roadLong, double degree, int edge)
+static void straightRoad(double tx, double ty, double tz, double roadLong, double degree, int edge, int textureType)
 {
     int xt, yt, zt;
+    
     switch (edge) {
         case CUBE_TOP_LEFT :
             xt = tx + ROAD_WIDTH;
@@ -976,8 +1011,20 @@ static void straightRoad(double tx, double ty, double tz, double roadLong, doubl
         break;
     }
     
+    GLuint _texture;
     glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D,_textureAsphalt);
+    	
+    	switch (textureType) {
+    		case ROAD:
+    			_texture = _textureAsphalt;
+    			break;
+    			
+    		case SIDEWALK:
+    			_texture = _textureSidewalk;
+    			break;
+		}
+    	
+        glBindTexture(GL_TEXTURE_2D, _texture);
         
         glPushMatrix();
             glTranslated(xt, yt, zt);
@@ -1100,17 +1147,27 @@ void display()
    else
    {
        
-      refX = (dim * Sin(th)) + fpX;
-      refY = (dim * Sin(ph));
-      refZ = (dim * -Cos(th)) + fpZ;
+//      refX = (dim * Sin(th)) + fpX;
+   	  refX = (dim * Sin(th));
+      refY = (dim * Sin(ph))+fpY;
+      //refZ = (dim * -Cos(th)) + fpZ;
+      refZ = (dim * -Cos(th));
       
-      gluLookAt(-3.5,10,2.3, refX,refY,refZ, 0,1,0);
+//      gluLookAt(-3.5,10,2.3, refX,refY,refZ, 0,1,0);
        
 //      centerX = (dim * Sin(th)) + fpX;
 //      centerY = (dim * Sin(ph));
 //      centerZ = (dim * -Cos(th)) + fpZ;
 //      gluLookAt(fpX,fpY,fpZ, centerX, centerY, centerZ, 0,1,0);
 //        gluLookAt(eyeX,eyeY,eyeZ, centerX, centerY, centerZ, 0,1,0);
+
+
+//      gluLookAt(fpX,fpY,fpZ, refX,refY,refZ, 0,1,0);
+	glRotated(-carRotate2,0,1,0);
+//	glRotated(90,0,1,0);
+	
+//    	glRotated(90,0,1,0);
+      gluLookAt(25.5+centerZIncrement,0.8,22-centerXIncrement, 25+centerZIncrement,refY,5-centerXIncrement, 0,1,0);
    }
 
    //  Draw scene =========================================================================================================
@@ -1118,7 +1175,7 @@ void display()
    skybox(64);
    
    //  Home
-   drawHome();
+//   drawHome();
    
 //   drawXYBaseRectangle(3, 0, -2, 9, 0, 4);
    
@@ -1131,17 +1188,34 @@ void display()
 
 int index=0;
 int roadNum;
-for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
-    straightRoad( circuit[index+0], //tx
-                  circuit[index+1], //ty
-                  circuit[index+2], //tz
-                  circuit[index+3], //road long
-                  circuit[index+4], //degree
-                  circuit[index+5] //rotate pivot
-                );
-                 
-    index += NUM_ROAD_PARAMS;
-}
+glPushMatrix();
+    glScaled(1.2,0,1.2);
+	for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
+	    straightRoad( circuit[index+0], //tx
+	                  circuit[index+1], //ty
+	                  circuit[index+2], //tz
+	                  circuit[index+3], //road long
+	                  circuit[index+4], //degree
+	                  circuit[index+5], //rotate pivot
+	                  circuit[index+6]  //texture type
+	                );
+	                 
+	    index += NUM_ROAD_PARAMS;
+	}
+	glPopMatrix();
+//index=0;
+//for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
+//    straightRoad( sidewalk[index+0], //tx
+//                  sidewalk[index+1], //ty
+//                  sidewalk[index+2], //tz
+//                  sidewalk[index+3], //road long
+//                  sidewalk[index+4], //degree
+//                  sidewalk[index+5], //rotate pivot
+//                  sidewalk[index+6]  //texture type
+//                );
+//                 
+//    index += NUM_ROAD_PARAMS;
+//}
 //curveRoad(0,0,0,2,0,2,0,5);
 
 //straightRoad(10, 0, 10, 10, -45, CUBE_TOP_LEFT  );
@@ -1157,8 +1231,10 @@ for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
 	
     glPushMatrix();
     	glTranslated(23,0,20);
+    	glRotated(90,0,1,0);
 	   //Red Car
-	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+		car(-1+centerXIncrement,0.2,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
     glPopMatrix();
 
    glutSwapBuffers();
@@ -1206,7 +1282,7 @@ void special(int key,int x,int y)
    Project(fov,asp,dim);
    //  Tell GLUT it is necessary to redisplay the scene
    glutPostRedisplay();
-   printf("th:%d fov:%d ph:%d\n", th, fov, ph);
+   printf("th:%d fov:%d ph:%d, refX:%f, refZ:%f, \n", th, fov, ph, refX, refZ);
 }
 
 /*
@@ -1234,7 +1310,46 @@ void key(unsigned char ch,int x,int y)
       fov--;
    else if (ch == '+' && ch<179)
       fov++;
-      
+    else if(ch == 'w' || ch == 'W')
+   {      
+          temp = xRotate;
+          xRotate = xRotate*Cos(0) + zRotate * Sin(0);
+          zRotate = -temp*Sin(0)+zRotate*Cos(0);
+          centerXIncrement += xRotate;
+          centerZIncrement += zRotate;
+          carRotate2 += 0;
+   }
+   
+   else if(ch == 's' || ch == 'S')
+   {      
+          temp = xRotate;
+          xRotate = xRotate*Cos(0) + zRotate * Sin(0);
+          zRotate = -temp*Sin(0)+zRotate*Cos(0);
+          centerXIncrement -= xRotate;
+          centerZIncrement -= zRotate;
+          carRotate2 += 0;
+   }
+     
+   else if(ch == 'd' || ch == 'D')
+      {
+          temp = xRotate;
+          xRotate = xRotate*Cos(-15) + zRotate * Sin(-15);
+          zRotate = -temp*Sin(-15)+zRotate*Cos(-15);       
+          centerXIncrement += xRotate;
+          centerZIncrement += zRotate;
+         
+          carRotate2 -= 15;
+         
+      }
+   else if(ch == 'a' || ch == 'A')
+   {
+          temp = xRotate;          
+          xRotate = xRotate*Cos(15) + zRotate * Sin(15);
+          zRotate = -temp*Sin(15)+zRotate*Cos(15);
+          centerXIncrement += xRotate;
+          centerZIncrement += zRotate;
+          carRotate2 += 15;    
+   }  
       
    //  Reproject
    Project(fov,asp,dim);
