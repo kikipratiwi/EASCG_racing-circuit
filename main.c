@@ -36,26 +36,27 @@
 //Road struct
 typedef struct Roads{
    double tx, 
-   		  ty, 
-		  tz,
-		  roadLong, 
-		  degree;
+             ty, 
+          tz,
+          roadLong, 
+          degree;
 }Road;
 
-//int mode=1;       //  Projection mode
-int th=-95;         //  Azimuth of view angle
-int ph=15;         //  Elevation of view angle
-int fov=35;       //  Field of view (for perspective)
+//int mode=0;       //  Projection mode
+//int th=-95;         //  Azimuth of view angle
+//int ph=15;         //  Elevation of view angle
+//int fov=35;       //  Field of view (for perspective)
 
 double fpX = 0;
 double fpY = 0.7;
 double fpZ = 0;
-
-int mode=0;       //  Projection mode
-//int th=110;         //  Azimuth of view angle
-//int ph=0;         //  Elevation of view angle
-//int fov=55;       //  Field of view (for perspective)
-
+//heli view---------------------------------
+int mode=1;       //  Projection mode
+int th=0;         //  Azimuth of view angle
+int fov=143;       //  Field of view (for perspective)
+//int fov=112;       //  Field of view (for perspective)
+int ph=90;         //  Elevation of view angle
+//------------------------------------------
 int move=1;       //  Move light
 int axes=0;       //  Display axes
 int light=1;      //  Lighting
@@ -112,33 +113,35 @@ float Specular[]  = {0,0,0,1.0};
 //
 ////Circuit
 //Road circuit[] ={road1};
-float circuit[] = {
-// 	tx, ty, 	 tz, roadLong, degree, rotate pivot
-	20,		0, (30-20), 	   21,  	0, 0,
-	(20+3), 0, (30-63), 	   50, 	   45, CUBE_BOTTOM_RIGHT,
-	(-25+2),0, (-30-17), 	   15,     90, CUBE_BOTTOM_RIGHT,
-	(-31),  0, (-5), 	   15,     45, CUBE_TOP_LEFT,
-	(6),  	0, (24), 	   20,     30, CUBE_TOP_LEFT,
-	15,  	0, (34.5), 	   15,  	0, 0,
-	6.9,  	0, (49.5), 	   15,  	30, CUBE_TOP_LEFT,
-	-20,  	0, (51), 	   27,  	90, CUBE_TOP_LEFT
+double circuit[] = {
+    
+    
+//     tx,  ty, tz,  roadLong, degree, rotate pivot
+    20,        0, (30-20),   21,   0, 0,                 //1   
+    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, //2
+    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, //3
+     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT,     //4
+     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT,     //5
+     -10.4,     0, (4.0),    15.45,   0, 0,                 //6
+     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT,     //7
+     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT      //8
 };
 
 size_t circuitSize = COUNT_ARRAY_ELEMENT(circuit);
 
 
-GLuint	_textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
-		_textureWoodFence, _textureGrass, _textureCinderBlock, _textureCarGrill, 
-		_textureHeadLamp, _textureCarbonFiber, _textureSidewalk, 
-		_textureGarageDoor, _textureWalkway, _textureHedge, _textureGreyBrick, 
-		_textureWoodBeam, _textureFrontDoor2, _textureWindow1, _textureSkyboxFront, 
-		_textureSkyboxBack, _textureSkyboxRight, _textureSkyboxLeft, _textureSkyboxTop, 
-		_textureAsphalt, _textureBrownBrick, _textureWhiteBrick, _textureMetalRoof, 
-		_textureWarehouseWindow, _textureSupport;
+GLuint    _textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
+        _textureWoodFence, _textureGrass, _textureCinderBlock, _textureCarGrill, 
+        _textureHeadLamp, _textureCarbonFiber, _textureSidewalk, 
+        _textureGarageDoor, _textureWalkway, _textureHedge, _textureGreyBrick, 
+        _textureWoodBeam, _textureFrontDoor2, _textureWindow1, _textureSkyboxFront, 
+        _textureSkyboxBack, _textureSkyboxRight, _textureSkyboxLeft, _textureSkyboxTop, 
+        _textureAsphalt, _textureBrownBrick, _textureWhiteBrick, _textureMetalRoof, 
+        _textureWarehouseWindow, _textureSupport;
 
-GLuint	_textureBrick, _textureFence, _textureStone, _textureConcrete, 
-		_textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
-		_textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow;      
+GLuint    _textureBrick, _textureFence, _textureStone, _textureConcrete, 
+        _textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
+        _textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow;      
 
 int refreshMills = 15;
 unsigned int ID;
@@ -148,53 +151,53 @@ float _angle = 0.0;
  *  GLUT calls this routine at the first time to load the texture
  */
 void initTexture() {
-	_textureSkyboxFront = LoadTexBMP("texture/skybox-front.bmp");
-	_textureSkyboxBack = LoadTexBMP("texture/skybox-back.bmp");
-	_textureSkyboxRight = LoadTexBMP("texture/skybox-right.bmp");
-	_textureSkyboxLeft = LoadTexBMP("texture/skybox-left.bmp");
-	_textureSkyboxTop = LoadTexBMP("texture/skybox-top.bmp");
-	_textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
+    _textureSkyboxFront = LoadTexBMP("texture/skybox-front.bmp");
+    _textureSkyboxBack = LoadTexBMP("texture/skybox-back.bmp");
+    _textureSkyboxRight = LoadTexBMP("texture/skybox-right.bmp");
+    _textureSkyboxLeft = LoadTexBMP("texture/skybox-left.bmp");
+    _textureSkyboxTop = LoadTexBMP("texture/skybox-top.bmp");
+    _textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
 
 
-	_textureGrass = LoadTexBMP("texture/grass.bmp");
-	_textureBrick = LoadTexBMP("texture/bricks.bmp");
-	_textureRoof = LoadTexBMP("texture/roof.bmp");
-	_textureDoor = LoadTexBMP("texture/front-door-2.bmp");
-	_textureWindow = LoadTexBMP("texture/window-1.bmp");
-	_textureFence = LoadTexBMP("texture/fence.bmp");
-	_textureStone = LoadTexBMP("texture/stone.bmp");
-	_textureConcrete = LoadTexBMP("texture/concrete.bmp");
-	_textureOrangeConcrete = LoadTexBMP("texture/concrete-orange.bmp");
-	_textureDirt = LoadTexBMP("texture/sidewalk.bmp");
-	_texturePebble = LoadTexBMP("texture/pebble.bmp");
-	_textureCeiling = LoadTexBMP("texture/ceiling.bmp");
-	_textureDiffuse = LoadTexBMP("texture/diffuse.bmp");  
-	
-	_textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
-	_textureSupport = LoadTexBMP("texture/support.bmp");
-	
-	_textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
+    _textureGrass = LoadTexBMP("texture/grass.bmp");
+    _textureBrick = LoadTexBMP("texture/bricks.bmp");
+    _textureRoof = LoadTexBMP("texture/roof.bmp");
+    _textureDoor = LoadTexBMP("texture/front-door-2.bmp");
+    _textureWindow = LoadTexBMP("texture/window-1.bmp");
+    _textureFence = LoadTexBMP("texture/fence.bmp");
+    _textureStone = LoadTexBMP("texture/stone.bmp");
+    _textureConcrete = LoadTexBMP("texture/concrete.bmp");
+    _textureOrangeConcrete = LoadTexBMP("texture/concrete-orange.bmp");
+    _textureDirt = LoadTexBMP("texture/sidewalk.bmp");
+    _texturePebble = LoadTexBMP("texture/pebble.bmp");
+    _textureCeiling = LoadTexBMP("texture/ceiling.bmp");
+    _textureDiffuse = LoadTexBMP("texture/diffuse.bmp");  
+    
+    _textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
+    _textureSupport = LoadTexBMP("texture/support.bmp");
+    
+    _textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
 }
 
 static void drawZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
-	glEnable(GL_TEXTURE_2D);
-	    glBegin(GL_QUADS);
-	        glVertex3f(x1, y1, z1); // top left
-	        glVertex3f(x2, y1, z1); // top right
-	        glVertex3f(x2, y2, z2); // bottom right
-	        glVertex3f(x1, y2, z2); // bottom left
-	    glEnd();
+    glEnable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+            glVertex3f(x1, y1, z1); // top left
+            glVertex3f(x2, y1, z1); // top right
+            glVertex3f(x2, y2, z2); // bottom right
+            glVertex3f(x1, y2, z2); // bottom left
+        glEnd();
     glDisable(GL_TEXTURE_2D);
 }
 
 static void drawXYBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
-	glEnable(GL_TEXTURE_2D);
-	    glBegin(GL_QUADS);
-	        glVertex3f(x1, y1, z1); // top left
-	        glVertex3f(x1, y1, z2); // top right
-	        glVertex3f(x2, y2, z2); // bottom right
-	        glVertex3f(x2, y2, z1); // bottom left
-	    glEnd();
+    glEnable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+            glVertex3f(x1, y1, z1); // top left
+            glVertex3f(x1, y1, z2); // top right
+            glVertex3f(x2, y2, z2); // bottom right
+            glVertex3f(x2, y2, z1); // bottom left
+        glEnd();
     glDisable(GL_TEXTURE_2D);
 }
 
@@ -202,7 +205,7 @@ static void drawHome() {
    
     /* =============================================Grass========================================= */
     glPushMatrix();
-    	glEnable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, _textureGrass);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -215,83 +218,83 @@ static void drawHome() {
         glEnd();
         glDisable(GL_TEXTURE_2D);
     glPopMatrix();
-	 
+     
 }
 
-//			cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
+//            cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
 static void cube(double x,double y,double z,
                  double dx,double dy,double dz,
                  double th) {
    //  Save transformation ===============================================================================================
    glPushMatrix();
-	   //  Offset, scale and rotate
-//	   glTranslated(x,y,z);
-	   glRotated(th,0,1,0);
-//	   glScaled(dx,dy,dz);
-	
-	   //Texture repitition values
-	   float texRepX = 1.0;
-	   float texRepY = 1.0;
-	
-	   //  Cube ==============================================================================================================
-	   glBegin(GL_QUADS);
-		   //  Front
-		   texRepX = dx/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f( 0, 0, 1);
-		   glTexCoord2f(0.0,0.0);			glVertex3f(x,	 y,		z); //A
-		   glTexCoord2f(texRepX,0.0);		glVertex3f(x+dx, y,		z); //B
-		   glTexCoord2f(texRepX,texRepY);	glVertex3f(x+dx, y+dy,	z); //C
-		   glTexCoord2f(0.0,texRepY);		glVertex3f(x,	 y+dy,	z); //D
+       //  Offset, scale and rotate
+//       glTranslated(x,y,z);
+       glRotated(th,0,1,0);
+//       glScaled(dx,dy,dz);
+    
+       //Texture repitition values
+       float texRepX = 1.0;
+       float texRepY = 1.0;
+    
+       //  Cube ==============================================================================================================
+       glBegin(GL_QUADS);
+           //  Front
+           texRepX = dx/texScale;
+           texRepY = dy/texScale;
+           glNormal3f( 0, 0, 1);
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y,        z); //A
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y,        z); //B
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x+dx, y+dy,    z); //C
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x,     y+dy,    z); //D
    
-		   //  Back
-		   texRepX = dx/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f( 0, 0,-1);
-		   glTexCoord2f(texRepX,0.0);		glVertex3f(x,	 y,		z+dz); //E
-		   glTexCoord2f(0.0,0.0);			glVertex3f(x+dx, y,		z+dz); //F
-		   glTexCoord2f(0.0,texRepY);		glVertex3f(x+dx, y+dy,	z+dz); //G
-		   glTexCoord2f(texRepX,texRepY);	glVertex3f(x,	 y+dy,	z+dz); //H
+           //  Back
+           texRepX = dx/texScale;
+           texRepY = dy/texScale;
+           glNormal3f( 0, 0,-1);
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x,     y,        z+dz); //E
+           glTexCoord2f(0.0,0.0);            glVertex3f(x+dx, y,        z+dz); //F
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x+dx, y+dy,    z+dz); //G
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x,     y+dy,    z+dz); //H
 
-		   //  Right
-		   texRepX = dz/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f(+1, 0, 0);
-		   glTexCoord2f(0.0,0.0);			glVertex3f(x+dx, y,		 z); //B
-		   glTexCoord2f(texRepX,0.0);		glVertex3f(x+dx, y,		z+dz); //F
-		   glTexCoord2f(texRepX,texRepY);	glVertex3f(x+dx, y+dy,	z+dz); //G
-		   glTexCoord2f(0.0,texRepY);		glVertex3f(x+dx, y+dy,	 z); //C
-		   
-		   //  Left
-		   texRepX = dz/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f(-1, 0, 0);
-		   glTexCoord2f(texRepX,0.0);		glVertex3f(x,	 y,		 z); //A
-		   glTexCoord2f(0.0,0.0);			glVertex3f(x,	 y,		z+dz); //E
-		   glTexCoord2f(0.0,texRepY);		glVertex3f(x,	 y+dy,	z+dz); //H
-		   glTexCoord2f(texRepX,texRepY);	glVertex3f(x,	 y+dy,	 z); //D
+           //  Right
+           texRepX = dz/texScale;
+           texRepY = dy/texScale;
+           glNormal3f(+1, 0, 0);
+           glTexCoord2f(0.0,0.0);            glVertex3f(x+dx, y,         z); //B
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y,        z+dz); //F
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x+dx, y+dy,    z+dz); //G
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x+dx, y+dy,     z); //C
+           
+           //  Left
+           texRepX = dz/texScale;
+           texRepY = dy/texScale;
+           glNormal3f(-1, 0, 0);
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x,     y,         z); //A
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y,        z+dz); //E
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x,     y+dy,    z+dz); //H
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x,     y+dy,     z); //D
    
-		   //  Top
-		   texRepX = dx/texScale;
-		   texRepY = dz/texScale;
-		   glNormal3f( 0,+1, 0);
-		   glTexCoord2f(0.0,0.0);			glVertex3f(x,	 y+dy,	 z); //D
-		   glTexCoord2f(texRepX,0.0);		glVertex3f(x+dx, y+dy,	 z); //C
-		   glTexCoord2f(0.0,texRepY);		glVertex3f(x+dx, y+dy,	z+dz); //G
-		   glTexCoord2f(texRepX,texRepY);	glVertex3f(x,	 y+dy,	z+dz); //H
+           //  Top
+           texRepX = dx/texScale;
+           texRepY = dz/texScale;
+           glNormal3f( 0,+1, 0);
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y+dy,     z); //D
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y+dy,     z); //C
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x+dx, y+dy,    z+dz); //G
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x,     y+dy,    z+dz); //H
    
-		   //  Bottom
-		   texRepX = dx/texScale;
-		   texRepY = dz/texScale;
-		   glNormal3f( 0,-one, 0);
-		   glTexCoord2f(0.0,texRepY);		glVertex3f(x,	 y,		 z); //A
-		   glTexCoord2f(texRepX,texRepY);	glVertex3f(x+dx, y,		 z); //B
-		   glTexCoord2f(texRepX,0.0);		glVertex3f(x+dx, y,		z+dz); //F
-		   glTexCoord2f(0.0,0.0);			glVertex3f(x,	 y,		z+dz); //E
-		   
-	   //  End of Cube ====================================================================================================
-	   glEnd();
-	   
+           //  Bottom
+           texRepX = dx/texScale;
+           texRepY = dz/texScale;
+           glNormal3f( 0,-one, 0);
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x,     y,         z); //A
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x+dx, y,         z); //B
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y,        z+dz); //F
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y,        z+dz); //E
+           
+       //  End of Cube ====================================================================================================
+       glEnd();
+       
    //  Undo transofrmations ===============================================================================================
    glPopMatrix();
 }
@@ -940,104 +943,108 @@ static void pitstop(double x, double y, double z)
 
 static void straightRoad(double tx, double ty, double tz, double roadLong, double degree, int edge)
 {
-	int xt, yt, zt;
-	switch (edge) {
-		case CUBE_TOP_LEFT :
-			xt = tx + ROAD_WIDTH;
-			yt = ty + ROAD_THICK;
-			zt = tz - roadLong;
-		break;
-		
-		case CUBE_TOP_RIGHT :
-			xt = tx + ROAD_WIDTH;
-			yt = ty + ROAD_THICK;
-			zt = tz + roadLong;   
-		break;
-		
-		case CUBE_BOTTOM_LEFT :
-			xt = tx - ROAD_WIDTH;
-			yt = ty + ROAD_THICK;
-			zt = tz - roadLong; 
-		break;
-		
-		case CUBE_BOTTOM_RIGHT :
-			xt = tx - ROAD_WIDTH;
-			yt = ty + ROAD_THICK;
-			zt = tz + roadLong; 
-		break;
-		
-		default:
-			xt = 0;
-			yt = 0;
-			zt = 0; 
-		break;
-	}
-	
-	glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D,_textureAsphalt);
-		
-		glTranslated(xt, yt, zt);
-		glPushMatrix();
-			glRotated(degree,0,1,0);
-			glTranslated(-xt, -yt, -zt);
-			cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
-		glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
+    int xt, yt, zt;
+    switch (edge) {
+        case CUBE_TOP_LEFT :
+            xt = tx + ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz - roadLong;
+        break;
+        
+        case CUBE_TOP_RIGHT :
+            xt = tx + ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz + roadLong;   
+        break;
+        
+        case CUBE_BOTTOM_LEFT :
+            xt = tx - ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz - roadLong; 
+        break;
+        
+        case CUBE_BOTTOM_RIGHT :
+            xt = tx - ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz + roadLong; 
+        break;
+        
+        default:
+            xt = 0;
+            yt = 0;
+            zt = 0; 
+        break;
+    }
+    
+    glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D,_textureAsphalt);
+        
+        glPushMatrix();
+            glTranslated(xt, yt, zt);
+            glRotated(degree,0,1,0);
+            glTranslated(-xt, -yt, -zt);
+            cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
+        glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
 
 static void curveRoad(double x, double y, double z,
                  double dx, double dy, double dz,
                  double th, double radius)
 {
-   //  Save transformation
-   glPushMatrix();
-   //  Offset, scale and rotate
-   glTranslated(x,y,z);
-   glRotated(th,0,1,0);
-   glScaled(dx,dy,dz);
-
-   //Texture repitition values
-   float texRepX = 1.0;
-   float texRepY = 1.0;
-
-   texRepX = dx/texScale;
-   texRepY = dz/texScale;
-	int i;
-	float x_now; 
-			float z_now;
-	const unsigned int triangles = 20; // number of triangles
-	const float twoPi = 2.0f * 3.14159f;
-	float delta = twoPi / triangles;
-	// Top
-	glBegin(GL_TRIANGLE_FAN);
-	glVertex3f(0.0,+1.0,0.0); // origin
-	for(i = 0; i <= triangles/4; i++){
-		x_now =  (radius * cos((i) *  delta));
-		z_now =  (radius * sin((i) * delta));
-		glTexCoord2f(x_now,z_now); glVertex3f(x_now,+1.0,z_now);
-	}
-	glEnd();
-	
-	// Bottom
-	glBegin(GL_TRIANGLE_FAN);
-	glVertex3f(0.0,-1.0,0.0); // origin
-	for(i = 0; i <= triangles/4; i++){
-		x_now =  (radius * cos((i) *  delta));
-		z_now =  (radius * sin((i) * delta));
-		glTexCoord2f(x_now,z_now); glVertex3f(x_now,-1.0,z_now);
-	}
-	glEnd();
-	
-	// Side Circular
-	glBegin(GL_TRIANGLE_STRIP);
-		for(i = 0; i <= triangles/4;i++) { 
-			x_now =  (radius * cos((i) *  delta));
-			z_now =  (radius * sin((i) * delta));
-			glTexCoord2f(x_now,z_now); glVertex3f(x_now,+1.0,z_now);
-			glTexCoord2f(x_now,z_now); glVertex3f(x_now,-1.0,z_now);
-		}
-	glEnd();
-   glPopMatrix();
+    glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D,_textureAsphalt);
+        
+           //  Save transformation
+           glPushMatrix();
+           //  Offset, scale and rotate
+           glTranslated(x,y,z);
+           glRotated(th,0,1,0);
+           glScaled(dx,dy,dz);
+        
+           //Texture repitition values
+           float texRepX = 1.0;
+           float texRepY = 1.0;
+        
+           texRepX = dx/texScale;
+           texRepY = dz/texScale;
+            int i;
+            float x_now; 
+                    float z_now;
+            const unsigned int triangles = 20; // number of triangles
+            const float twoPi = 2.0f * 3.14159f;
+            float delta = twoPi / triangles;
+            // Top
+            glBegin(GL_TRIANGLE_FAN);
+            glVertex3f(0.0,+1.0,0.0); // origin
+            for(i = 0; i <= triangles/4; i++){
+                x_now =  (radius * cos((i) *  delta));
+                z_now =  (radius * sin((i) * delta));
+                glTexCoord2f(x_now,z_now); glVertex3f(x_now,+1.0,z_now);
+            }
+            glEnd();
+            
+            // Bottom
+            glBegin(GL_TRIANGLE_FAN);
+            glVertex3f(0.0,-1.0,0.0); // origin
+            for(i = 0; i <= triangles/4; i++){
+                x_now =  (radius * cos((i) *  delta));
+                z_now =  (radius * sin((i) * delta));
+                glTexCoord2f(x_now,z_now); glVertex3f(x_now,-1.0,z_now);
+            }
+            glEnd();
+            
+            // Side Circular
+            glBegin(GL_TRIANGLE_STRIP);
+                for(i = 0; i <= triangles/4;i++) { 
+                    x_now =  (radius * cos((i) *  delta));
+                    z_now =  (radius * sin((i) * delta));
+                    glTexCoord2f(x_now,z_now); glVertex3f(x_now,+1.0,z_now);
+                    glTexCoord2f(x_now,z_now); glVertex3f(x_now,-1.0,z_now);
+                }
+            glEnd();
+        glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -1086,24 +1093,24 @@ void display()
       double Ey = +2*dim        *Sin(ph);
       double Ez = +2*dim*Cos(th)*Cos(ph);
       
-//	  printf("x:%d y:%d z:%d\n", Ex, Ey, Ez);
+//      printf("x:%d y:%d z:%d\n", Ex, Ey, Ez);
       gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
    }
    //  First Person
    else
    {
-   	
+       
       refX = (dim * Sin(th)) + fpX;
       refY = (dim * Sin(ph));
       refZ = (dim * -Cos(th)) + fpZ;
       
       gluLookAt(-3.5,10,2.3, refX,refY,refZ, 0,1,0);
-   	
+       
 //      centerX = (dim * Sin(th)) + fpX;
 //      centerY = (dim * Sin(ph));
 //      centerZ = (dim * -Cos(th)) + fpZ;
 //      gluLookAt(fpX,fpY,fpZ, centerX, centerY, centerZ, 0,1,0);
-//		gluLookAt(eyeX,eyeY,eyeZ, centerX, centerY, centerZ, 0,1,0);
+//        gluLookAt(eyeX,eyeY,eyeZ, centerX, centerY, centerZ, 0,1,0);
    }
 
    //  Draw scene =========================================================================================================
@@ -1125,30 +1132,34 @@ void display()
 int index=0;
 int roadNum;
 for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
-	straightRoad( circuit[index+0], //tx
-				  circuit[index+1], //ty
-				  circuit[index+2], //tz
-				  circuit[index+3], //road long
-				  circuit[index+4], //degree
-				  circuit[index+5] //rotate pivot
-				);
-				 
-	index += NUM_ROAD_PARAMS;
+    straightRoad( circuit[index+0], //tx
+                  circuit[index+1], //ty
+                  circuit[index+2], //tz
+                  circuit[index+3], //road long
+                  circuit[index+4], //degree
+                  circuit[index+5] //rotate pivot
+                );
+                 
+    index += NUM_ROAD_PARAMS;
 }
-curveRoad(10,2,50,2,0,5,0,5);
+//curveRoad(0,0,0,2,0,2,0,5);
 
 //straightRoad(10, 0, 10, 10, -45, CUBE_TOP_LEFT  );
 //straightRoad(20, 0, 10, 10, 45, CUBE_TOP_RIGHT  );
 //straightRoad(30, 0, 10, 10, 45, CUBE_BOTTOM_LEFT  );
 //straightRoad(40, 0, 10, 10, 45, CUBE_BOTTOM_RIGHT  );
 
-//			cube(-40, 0, -50, ROAD_WIDTH, ROAD_THICK, 6, 0);
-//			
-//			cube(-55, 0, -57, ROAD_WIDTH, ROAD_THICK, 14, 0);
-			
+//            cube(-40, 0, -50, ROAD_WIDTH, ROAD_THICK, 6, 0);
+//            
+//            cube(-55, 0, -57, ROAD_WIDTH, ROAD_THICK, 14, 0);
+            
 
-   //Red Car
-   car(-9,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+	
+    glPushMatrix();
+    	glTranslated(23,0,20);
+	   //Red Car
+	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+    glPopMatrix();
 
    glutSwapBuffers();
 }
@@ -1223,6 +1234,8 @@ void key(unsigned char ch,int x,int y)
       fov--;
    else if (ch == '+' && ch<179)
       fov++;
+      
+      
    //  Reproject
    Project(fov,asp,dim);
    //  Animate if requested
