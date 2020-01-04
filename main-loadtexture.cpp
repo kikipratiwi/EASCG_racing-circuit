@@ -1,0 +1,1412 @@
+/*
+ *  EAS Kiki Pratiwi 171511046
+ *
+ *  p             Toggles first person/perspective projection
+ *  arrow keys    Change view angle
+ *  PgDn/PgUp     Zoom in and out (in perspective view)
+ *  ESC           Exit
+ *
+ */
+#include "lib/JTKPOLBAN.h"
+#include "lib/loadtexbmp.c"
+#include "lib/fatal.c"
+#include "lib/Errcheck.c"
+#include "lib/print.c"
+#include "lib/project.c"
+
+#include "lib/BmpLoader.h"
+#include "lib/BmpLoader.c"
+
+#include <math.h>
+
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
+
+#define X_CENTER 0
+#define Y_CENTER -1.5
+#define Z_CENTER 0
+#define ROAD_WIDTH 5
+#define ROAD_LONG 1
+#define ROAD_THICK 0.3
+#define NUM_ROAD_PARAMS 6
+#define COUNT_ARRAY_ELEMENT(x)  (sizeof(x) / sizeof((x)[0]))
+#define CUBE_TOP_LEFT 1
+#define CUBE_TOP_RIGHT 2
+#define CUBE_BOTTOM_LEFT 3
+#define CUBE_BOTTOM_RIGHT 4
+#define ROAD 1
+#define SIDEWALK 2
+
+//Road struct
+typedef struct Roads{
+   double tx, 
+             ty, 
+          tz,
+          roadLong, 
+          degree;
+}Road;
+
+
+
+//int mode=0;       //  Projection mode
+//int th=110;         //  Azimuth of view angle
+//int ph=0;         //  Elevation of view angle
+//int fov=55;       //  Field of view (for perspective)
+
+int mode=0;       //  Projection mode
+int th=105;         //  Azimuth of view angle
+int ph=0;         //  Elevation of view angle
+int fov=55;       //  Field of view (for perspective)
+
+//double fpX = 0;
+//double fpY = 0.7;
+//double fpZ = 0;
+//heli view---------------------------------
+//int mode=1;       //  Projection mode
+//int th=0;         //  Azimuth of view angle
+//int fov=143;       //  Field of view (for perspective)
+////int fov=112;       //  Field of view (for perspective)
+//int ph=90;         //  Elevation of view angle
+//------------------------------------------
+int move=1;       //  Move light
+int axes=0;       //  Display axes
+int light=1;      //  Lighting
+double asp=1.333;  //  Aspect ratio
+double dim=8.0;   //  Size of world
+
+// Light values
+int one       =   1;  // Unit value
+int distance  =   25;  // Light distance
+int inc       =  10;  // Ball increment
+int smooth    =   1;  // Smooth/Flat shading
+int local     =   0;  // Local Viewer Model
+int emission  =  30;  // Emission intensity (%)
+int ambient   =  80;  // Ambient intensity (%)
+int diffuse   = 100;  // Diffuse intensity (%)
+int specular  =   0;  // Specular intensity (%)
+int shininess =   0;  // Shininess (power of two)
+float shiny   =   1;  // Shininess (value)
+int zh        =  90;  // Light azimuth
+float ylight  = 13;  // Elevation of light
+
+int at0=100;      //  Constant  attenuation %
+int at1=20;        //  Linear    attenuation %
+int at2=20;        //  Quadratic attenuation %
+
+double fpMoveInc = 0.02; //Multiplier for how much to move each keystroke in FP mode
+
+//First person camera location
+double fpX = 0;
+double fpY = 0.8;
+double fpZ = -0.3;
+
+//x, y, z for refrence point in glLookAt() for FP mode
+double refX = 5;
+double refY = 0;
+double refZ = 0;
+
+//Texture Variables
+int tMode = 0;
+float texScale = 0.5;
+
+//Light Vecotrs
+float Ambient[]   = {0.8 ,0.8 ,0.8 ,1.0};
+float Diffuse[]   = {1.0,1.0,1.0,1.0};
+float Specular[]  = {0,0,0,1.0};
+
+
+//road1.ty = 0;
+//road1.tz = 30;
+//road1.roadLong = 5;
+//road1.degree = 0;
+//
+////straightRoad(40, 0, -50 0);
+//
+////Circuit
+//Road circuit[] ={road1};
+double circuit[] = { 
+//     tx,  ty, tz,  roadLong, degree, rotate pivot
+    20,        0, (30-20),   21,   0, 0,                //1   
+    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, //2
+    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, //3
+     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT,     //4
+     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT,     //5
+     -10.4,     0, (4.0),    15.45,   0, 0,                 //6
+     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT,     //7
+     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT      //8
+};
+
+double sidewalk[] = {
+//     tx,  ty, tz,  roadLong, degree, rotate pivot
+    20,        0, (30-20),   21,   0, 0,                //1   
+    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, //2
+    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, //3
+     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT,     //4
+     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT,     //5
+     -10.4,     0, (4.0),    15.45,   0, 0,                 //6
+     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT,     //7
+     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT      //8
+};
+
+size_t circuitSize = COUNT_ARRAY_ELEMENT(circuit);
+
+
+GLuint    _textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
+        _textureWoodFence, _textureGrass, _textureCinderBlock, _textureCarGrill, 
+        _textureHeadLamp, _textureCarbonFiber, _textureSidewalk, 
+        _textureGarageDoor, _textureWalkway, _textureHedge, _textureGreyBrick, 
+        _textureWoodBeam, _textureFrontDoor2, _textureWindow1, _textureSkyboxFront, 
+        _textureSkyboxBack, _textureSkyboxRight, _textureSkyboxLeft, _textureSkyboxTop, 
+        _textureAsphalt, _textureBrownBrick, _textureWhiteBrick, _textureMetalRoof, 
+        _textureWarehouseWindow, _textureSupport;
+
+GLuint    _textureBrick, _textureFence, _textureStone, _textureConcrete, 
+        _textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
+        _textureDiffuse, _textureDoor, _textureRoof, _textureWindow,
+		_textureSand, _textureCement, _textureSquareStone, _textureHexagonStone, _textureGreyStone;      
+
+int refreshMills = 15;
+unsigned int ID;
+float _angle = 0.0;
+
+
+float centerXIncrement = 0;
+float centerZIncrement = 0;
+float xRotate = 0.5;
+float zRotate = 0;
+float carRotate2 = 0;
+float temp;
+
+
+GLuint loadTexture(const char* filename) {
+	BmpLoader bl(filename);	
+	GLuint textureId;
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexImage2D(GL_TEXTURE_2D,
+				 0,
+				 GL_RGB,
+				 bl.iWidth, bl.iHeight,
+				 0,
+				 GL_RGB,
+				 GL_UNSIGNED_BYTE,
+				 bl.textureData);
+	return textureId;
+}
+
+/*
+ *  GLUT calls this routine at the first time to load the texture
+ */
+void initTexture() {
+    _textureSkyboxFront = loadTexture("texture/skybox-front.bmp");
+    _textureSkyboxBack = loadTexture("texture/skybox-back.bmp");
+    _textureSkyboxRight = loadTexture("texture/skybox-right.bmp");
+    _textureSkyboxLeft = loadTexture("texture/skybox-left.bmp");
+    _textureSkyboxTop = loadTexture("texture/skybox-top.bmp");
+    _textureBrownBrick = loadTexture("texture/brown-brick.bmp");
+
+
+    _textureGrass = loadTexture("texture/grass.bmp");
+    _textureBrick = loadTexture("texture/bricks.bmp");
+    _textureRoof = loadTexture("texture/roof.bmp");
+    _textureDoor = loadTexture("texture/front-door-2.bmp");
+    _textureWindow = loadTexture("texture/window-1.bmp");
+    _textureFence = loadTexture("texture/fence.bmp");
+    _textureStone = loadTexture("texture/stone.bmp");
+    _textureConcrete = loadTexture("texture/concrete.bmp");
+    _textureOrangeConcrete = loadTexture("texture/concrete-orange.bmp");
+    _textureDirt = loadTexture("texture/sidewalk.bmp");
+    _texturePebble = loadTexture("texture/pebble.bmp");
+    _textureCeiling = loadTexture("texture/ceiling.bmp");
+    _textureDiffuse = loadTexture("texture/diffuse.bmp");  
+    
+    _textureBrownBrick = loadTexture("texture/brown-brick.bmp");
+    _textureSupport = loadTexture("texture/support.bmp");
+    
+    _textureAsphalt = loadTexture("texture/road_road_0005_01_tiled_s.bmp");
+    _textureSidewalk = loadTexture("texture/sidewalk.bmp");
+    
+//	_textureSand =  loadTexture("texture/sand.bmp");
+//	_textureCement = loadTexture("texture/cement.bmp");
+//	_textureSquareStone = loadTexture("texture/square-stone.bmp");
+//	_textureHexagonStone = loadTexture("texture/hexagon-stone.bmp");
+//	_textureGreyStone = loadTexture("texture/grey-stone.bmp");
+}
+
+static void drawZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
+    glEnable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+            glVertex3f(x1, y1, z1); // top left
+            glVertex3f(x2, y1, z1); // top right
+            glVertex3f(x2, y2, z2); // bottom right
+            glVertex3f(x1, y2, z2); // bottom left
+        glEnd();
+    glDisable(GL_TEXTURE_2D);
+}
+
+static void drawXYBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
+    glEnable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+            glVertex3f(x1, y1, z1); // top left
+            glVertex3f(x1, y1, z2); // top right
+            glVertex3f(x2, y2, z2); // bottom right
+            glVertex3f(x2, y2, z1); // bottom left
+        glEnd();
+    glDisable(GL_TEXTURE_2D);
+}
+
+static void drawHome() {
+   
+    /* =============================================Grass========================================= */
+    glPushMatrix();
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureGrass);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glRotatef(_angle, 0.0, 1.0, 0.0);
+        glBegin(GL_QUADS);
+            glTexCoord3f(0.0,70.0,1);  glVertex3f(-50,Y_CENTER,50); //scale 1/70
+            glTexCoord3f(0.0,0.0,-1);  glVertex3f(-50,Y_CENTER,-50);
+            glTexCoord3f(70.0,0.0,-1);  glVertex3f(50,Y_CENTER,-50);
+            glTexCoord3f(70.0,70.0,1);  glVertex3f(50,Y_CENTER,50);
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+     
+}
+
+//            cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
+static void cube(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th) {
+   //  Save transformation ===============================================================================================
+   glPushMatrix();
+       //  Offset, scale and rotate
+//       glTranslated(x,y,z);
+       glRotated(th,0,1,0);
+//       glScaled(dx,dy,dz);
+    
+       //Texture repitition values
+       float texRepX = 1.0;
+       float texRepY = 1.0;
+    
+       //  Cube ==============================================================================================================
+       glBegin(GL_QUADS);
+           //  Front
+           texRepX = dx/texScale;
+           texRepY = dy/texScale;
+           glNormal3f( 0, 0, 1);
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y,        z); //A
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y,        z); //B
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x+dx, y+dy,    z); //C
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x,     y+dy,    z); //D
+   
+           //  Back
+           texRepX = dx/texScale;
+           texRepY = dy/texScale;
+           glNormal3f( 0, 0,-1);
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x,     y,        z+dz); //E
+           glTexCoord2f(0.0,0.0);            glVertex3f(x+dx, y,        z+dz); //F
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x+dx, y+dy,    z+dz); //G
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x,     y+dy,    z+dz); //H
+
+           //  Right
+           texRepX = dz/texScale;
+           texRepY = dy/texScale;
+           glNormal3f(+1, 0, 0);
+           glTexCoord2f(0.0,0.0);            glVertex3f(x+dx, y,         z); //B
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y,        z+dz); //F
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x+dx, y+dy,    z+dz); //G
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x+dx, y+dy,     z); //C
+           
+           //  Left
+           texRepX = dz/texScale;
+           texRepY = dy/texScale;
+           glNormal3f(-1, 0, 0);
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x,     y,         z); //A
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y,        z+dz); //E
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x,     y+dy,    z+dz); //H
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x,     y+dy,     z); //D
+   
+           //  Top
+           texRepX = dx/texScale;
+           texRepY = dz/texScale;
+           glNormal3f( 0,+1, 0);
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y+dy,     z); //D
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y+dy,     z); //C
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x+dx, y+dy,    z+dz); //G
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x,     y+dy,    z+dz); //H
+   
+           //  Bottom
+           texRepX = dx/texScale;
+           texRepY = dz/texScale;
+           glNormal3f( 0,-one, 0);
+           glTexCoord2f(0.0,texRepY);        glVertex3f(x,     y,         z); //A
+           glTexCoord2f(texRepX,texRepY);    glVertex3f(x+dx, y,         z); //B
+           glTexCoord2f(texRepX,0.0);        glVertex3f(x+dx, y,        z+dz); //F
+           glTexCoord2f(0.0,0.0);            glVertex3f(x,     y,        z+dz); //E
+           
+       //  End of Cube ====================================================================================================
+       glEnd();
+       
+   //  Undo transofrmations ===============================================================================================
+   glPopMatrix();
+}
+
+
+static void skybox(float dim) {
+   glDisable(GL_POLYGON_OFFSET_FILL);
+
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   glColor3f(0.7, 0.7, 0.7);
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxFront);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+   glNormal3f(0, 0, -1);
+   glTexCoord2f(1.0,0.0); glVertex3f(+dim,-dim, dim);
+   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, dim);
+   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, dim);
+   glTexCoord2f(1.0,1.0); glVertex3f(+dim,+dim, dim);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxBack);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+   glNormal3f(0, 0, 1);
+   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, -dim);
+   glTexCoord2f(0.0,0.0); glVertex3f(+dim,-dim, -dim);
+   glTexCoord2f(0.0,1.0); glVertex3f(+dim,+dim, -dim);
+   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, -dim);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxRight);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+   glNormal3f(-1, 0, 0);
+   glTexCoord2f(1.0,0.0); glVertex3f(dim,-dim, -dim);
+   glTexCoord2f(0.0,0.0); glVertex3f(dim,-dim, +dim);
+   glTexCoord2f(0.0,1.0); glVertex3f(dim,+dim, +dim);
+   glTexCoord2f(1.0,1.0); glVertex3f(dim,+dim, -dim);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxLeft);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+   glNormal3f(1, 0, 0);
+   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, +dim);
+   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, -dim);
+   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, -dim);
+   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, +dim);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxTop);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+   glNormal3f(0, -1, 0);
+   glTexCoord2f(1.0,0.0); glVertex3f(+dim,dim, +dim);
+   glTexCoord2f(0.0,0.0); glVertex3f(-dim,dim, +dim);
+   glTexCoord2f(0.0,1.0); glVertex3f(-dim,dim, -dim);
+   glTexCoord2f(1.0,1.0); glVertex3f(+dim,dim, -dim);
+   glEnd();
+}
+
+static void body(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 int w)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+   texScale = 0.1;
+
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   //Texture repitition values
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+
+   //  Cube
+   glBegin(GL_QUADS);
+
+   //  Top
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glNormal3f( 0,+1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+   //  Bottom
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glNormal3f( 0,-one, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
+
+   //  Front
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f( 0, 0, 1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
+   //  Back
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f( 0, 0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
+
+   //  End
+   glEnd();
+
+   glDisable(GL_POLYGON_OFFSET_FILL);
+   //Color and texture to add windows
+   if(w == 1) {
+      glColor3f(0.8, 0.8, 1);
+      glBindTexture(GL_TEXTURE_2D,_textureGlass);
+      texRepX = 1.0;
+      texRepY = 1.0;
+      glBegin(GL_QUADS);
+      //  Front
+      glNormal3f(0, 0, 1);
+      glTexCoord2f(0.0,0.0); glVertex3f(-0.8,-1, 1);
+      glTexCoord2f(texRepX,0.0); glVertex3f(+0.8,-1, 1);
+      glTexCoord2f(texRepX,texRepY); glVertex3f(+0.8,+1, 1);
+      glTexCoord2f(0.0,texRepY); glVertex3f(-0.8,+1, 1);
+      //  Back
+      glNormal3f(0, 0,-1);
+      glTexCoord2f(0.0,0.0); glVertex3f(+0.8,-1,-1);
+      glTexCoord2f(texRepX,0.0); glVertex3f(-0.8,-1,-1);
+      glTexCoord2f(texRepX,texRepY); glVertex3f(-0.8,+1,-1);
+      glTexCoord2f(0.0,texRepY); glVertex3f(+0.8,+1,-1);
+      glEnd();
+   }
+   glEnable(GL_POLYGON_OFFSET_FILL);
+   
+   //  Undo transformations
+   glPopMatrix();
+}
+
+static void wheel(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 int d,
+                 int s)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   //Turn off shininess for the rubber tire
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   glBindTexture(GL_TEXTURE_2D,_textureWheel);
+
+   glColor3f(0.8,0.8,0.8);
+   //Tire
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(0, 0, -1);
+   glTexCoord2f(0.5,0.5);
+   glVertex3f(0, 0, -0.05);
+   for (th=0;th<=360;th+=s)
+   {
+      double ph = d-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(Sin(th)*Cos(ph), Cos(th)*Cos(ph), -0.05);
+   }
+   glEnd();
+
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(0, 0, 1);
+   glTexCoord2f(0.5,0.5);
+   glVertex3f(0, 0, 0.05);
+   for (th=360;th>=0;th-=s)
+   {
+      double ph = d-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(Sin(th)*Cos(ph) , Cos(th)*Cos(ph), 0.05);
+   }
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D, _textureTire);
+
+   glColor3f(0.5,0.5,0.55);
+   glBegin(GL_QUAD_STRIP);
+   for (th=0;th<=360;th+=s)
+   {
+      double ph = d-90;
+      glNormal3f(Sin(th)*Cos(ph), Cos(th)*Cos(ph), 0);
+      glTexCoord2f(0,0.1*th); glVertex3d(Sin(th)*Cos(ph), Cos(th)*Cos(ph), -0.05);
+      glTexCoord2f(1,0.1*th); glVertex3d(Sin(th)*Cos(ph), Cos(th)*Cos(ph), 0.05);
+   }
+   // glNormal3f(Sin(0)*Cos(-90), Cos(0)*Cos(-90), 0);
+   // glVertex3d(Sin(0)*Cos(-90), Cos(0)*Cos(-90), -0.05);
+   // glVertex3d(Sin(0)*Cos(-90), Cos(0)*Cos(-90), 0.05);
+   glEnd();
+
+   //  Undo transformations
+   glPopMatrix();
+}
+
+
+static void bumper(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 int m)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   //Texture repitition values
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+   texScale = 0.1;
+
+   //Offset the bumper so that the lights and grill are drawn directly on the surface
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   //Bumper
+
+   //Base
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glBegin(GL_POLYGON);
+   glNormal3f(0, -1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0,0,0.4);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0,0,-0.4);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.1,0,-0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.1,0,0.35);
+   glEnd();
+
+   //Front Panels
+   glBegin(GL_QUADS);
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.447214, 0, 0.894427);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0, 0.2, 0.4);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0, 0, 0.4);
+
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(1, 0, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0, -0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.1, 0.2, -0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.1, 0, 0.35);
+
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.447214, 0, -0.894427);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0, -0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0, 0, -0.4);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0, 0.2, -0.4);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.1, 0.2, -0.35);
+   
+   glEnd();
+
+   //Upper Bumper
+   glBegin(GL_QUADS);
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.447214, 0.894427, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0, 0.25, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.1, 0.2, -0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0, 0.25, -0.35);
+   glEnd();
+
+   glBegin(GL_TRIANGLES);
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.333333, 0.666667, 0.666667);
+   glTexCoord2f(0.0, 0.0); glVertex3f(0, 0.2, 0.4);
+   glTexCoord2f(texRepX/2, texRepY); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0, 0.25, 0.35);
+
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.333333, 0.666667, -0.666667);
+   glTexCoord2f(0.0, 0.0); glVertex3f(0, 0.25, -0.35);
+   glTexCoord2f(texRepX/2, texRepY); glVertex3f(0.1, 0.2, -0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0, 0.2, -0.4);
+   glEnd();
+
+   //  Disable polygon offset
+   glDisable(GL_POLYGON_OFFSET_FILL);
+
+   if (m == 1) {
+      glColor3f(0.2,0.2,0.2);
+      glBindTexture(GL_TEXTURE_2D,_textureCarGrill);
+
+      //Grill
+      glBegin(GL_QUADS);
+      glNormal3f(1, 0, 0);
+      glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0.15, 0.18);
+      glTexCoord2f(0.5,0.0); glVertex3f(0.1, 0.03, 0.18);
+      glTexCoord2f(0.5,1.0); glVertex3f(0.1, 0.03, -0.18);
+      glTexCoord2f(0.0,1.0); glVertex3f(0.1, 0.15, -0.18);
+      glEnd();
+   }
+
+   //Lights (taillights or headlights)
+   float emColor[4];
+   if(m == 1) {
+      emColor[0] = 1.0 * emission;
+      emColor[1] = 1.0 * emission;
+      emColor[2] = 0.8 * emission;
+      emColor[3] = 1.0 * emission;
+      glColor3f(1, 1, 0.8);
+   } else {
+      emColor[0] = 0.8 * emission;
+      emColor[1] = 0.0 * emission;
+      emColor[2] = 0.0 * emission;
+      emColor[3] = 1.0 * emission;
+      glColor3f(.8, 0, 0);
+   }
+
+   glMaterialf(GL_FRONT,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT,GL_SPECULAR,emColor);
+   glMaterialfv(GL_FRONT,GL_EMISSION,emColor);
+
+   glBindTexture(GL_TEXTURE_2D,_textureHeadLamp);
+
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(1, 0, 0);
+   glTexCoord2f(0.5,0.5); glVertex3f(0.1, 0.13, -0.25);
+   for (th=0;th<=360;th+=10)
+   {
+      double ph = 3-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(0.1, 0.13+(Cos(th)*Cos(ph)), -0.25+(Sin(th)*Cos(ph)));
+   }
+   glEnd();
+
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(1, 0, 0);
+   glTexCoord2f(0.5,0.5); glVertex3f(0.1, 0.13, 0.25);
+   for (th=0;th<=360;th+=10)
+   {
+      double ph = 3-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(0.1, 0.13+(Cos(th)*Cos(ph)), 0.25+(Sin(th)*Cos(ph)));
+   }
+   glEnd();
+
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   //Undo transformations
+   glPopMatrix();  
+}
+
+static void car(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 float cr, float cb, float cg)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   glPolygonOffset(1,1);
+
+   wheel(0.6,0,0.4, 1,1,1, 0, 8, 10);
+   wheel(-0.6,0,-0.4, 1,1,1, 0, 8, 10);
+   wheel(0.6,0,-0.4, 1,1,1, 0, 8, 10);
+   wheel(-0.6,0,0.4, 1,1,1, 0, 8, 10);
+
+   glColor3f(cr, cb, cg);
+
+   //Lower Body
+   body(0,0.1,0, 0.8,0.1,0.4, 0, 0);
+   //Cabin
+   body(-0.1,0.3,0, 0.3,0.1,0.35, 0, 1);
+
+   texScale = 1.0;
+
+   glColor3f(cr, cb, cg);
+
+   //Front Bumper
+   bumper(0.8,0,0, 1,1,1, 0, 1);
+
+   glColor3f(cr, cb, cg);
+
+   //Rear Bumper
+   bumper(-0.8,0,0, 1,1,1, 180, 0);
+
+   //  Set specular color to white
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   glColor3f(cr, cb, cg);
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+
+   //Texture repitition values
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+
+   //Hood and upper side pannels
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glBegin(GL_QUADS);
+   glNormal3f(0, 0.707107, 0.707107);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8, 0.25, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8, 0.2, 0.4);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.8, 0.2, 0.4);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.8, 0.25, 0.35);
+
+   glNormal3f(0, 1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.4, 0.25, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.8, 0.25, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.8, 0.25, -0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.4, 0.25, -0.35);
+   
+   glNormal3f(0, 0.707107, -0.707107);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8, 0.2, -0.4);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8, 0.25, -0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.8, 0.25, -0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.8, 0.2, -0.4);
+   glEnd();
+
+   //Trunk
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glBegin(GL_QUADS);
+   glNormal3f(0,1,0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8, 0.25, -0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8, 0.25, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.6, 0.25, 0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.6, 0.25, -0.35);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureGlass);
+
+   glColor3f(0.8, 0.8, 1);
+
+   //Windshield
+   texRepX = 1.0;
+   texRepY = 1.0;
+   glBegin(GL_QUADS);
+   glNormal3f(0.6, 0.8, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.4,0.25,0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.4,0.25,-0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.2,0.4,-0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.2,0.4,0.35);
+   glEnd();
+
+   glBegin(GL_TRIANGLES);
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.2,0.4,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0.2,0.25,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(0.4,0.25,0.35);
+
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.4,0.25,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0.2,0.25,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(0.2,0.4,-0.35);
+   glEnd();
+
+   //Rear Window
+   texRepX = 1.0;
+   texRepY = 1.0;
+   glBegin(GL_QUADS);
+   glNormal3f(-0.6, 0.8, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.6,0.25,-0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.6,0.25,0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.4,0.4,0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.4,0.4,-0.35);
+   glEnd();
+
+   glBegin(GL_TRIANGLES);
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.6,0.25,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.4,0.25,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.4,0.4,0.35);
+   
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.4,0.4,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.4,0.25,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.6,0.25,-0.35);
+   glEnd();
+
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   glBindTexture(GL_TEXTURE_2D,_textureCarbonFiber);
+
+   //Spoiler
+   glColor3f(0.3,0.3,0.3);
+   cube(-0.75,0.28,0.3, 0.02,0.03,0.02, 0);
+   cube(-0.75,0.28,-0.3, 0.02,0.03,0.02, 0);
+
+   texRepX = 5.0;
+   texRepY = 1.0;
+
+   glBegin(GL_QUADS);
+   glNormal3f(0, -1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.7,0.31,-0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.7,0.31,0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.8,0.31,0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.8,0.31,-0.35);
+   
+   glNormal3f(0.196116, 0.980581, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8,0.33,-0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8,0.33,0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.7,0.31,0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.7,0.31,-0.35);
+
+   texRepX = 5.0;
+   texRepY = 0.2;
+   glNormal3f(-1, 0, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8,0.33,0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8,0.33,-0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.8,0.31,-0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.8,0.31,0.35);
+   
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+   glColor3f(cr, cb, cg);
+
+   //Spoiler Fins
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glBegin(GL_TRIANGLES);
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.68,0.31,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.82,0.35,-0.35);
+
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.82,0.35,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.68,0.31,0.35);
+   
+   //Duplicate to draw both sides (with inverted normals) when face culling is on
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.68,0.31,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.82,0.35,-0.35);
+
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.82,0.35,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.68,0.31,0.35);
+   
+   glEnd();
+
+   //Undo transformations
+   glPopMatrix();
+}
+
+
+static void pitstop(double x, double y, double z)
+{
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+//   1, 0 ,-2
+   //Building
+//   texScale = 0.5;
+   glEnable(GL_TEXTURE_2D);
+   glBindTexture(GL_TEXTURE_2D,_textureSupport);
+   cube(0,1.6,0, 2,0.4,1, 0); //Top
+   glDisable(GL_TEXTURE_2D);
+   
+   glPushMatrix();
+   glEnable(GL_TEXTURE_2D);
+   glBindTexture(GL_TEXTURE_2D,_textureBrownBrick);
+   cube(-1.75,0.65,0, 0.25,0.55,1, 0); //Left
+   cube(1.75,0.65,0, 0.25,0.55,1, 0); //Right
+   cube(0,0.65,0, 0.2,0.55,1, 0); //Middle
+   glDisable(GL_TEXTURE_2D);
+   glPopMatrix();   
+  
+}
+
+static void straightRoad(double tx, double ty, double tz, double roadLong, double degree, int edge)
+{
+    int xt, yt, zt;
+    
+    switch (edge) {
+        case CUBE_TOP_LEFT :
+            xt = tx + ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz - roadLong;
+        break;
+        
+        case CUBE_TOP_RIGHT :
+            xt = tx + ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz + roadLong;   
+        break;
+        
+        case CUBE_BOTTOM_LEFT :
+            xt = tx - ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz - roadLong; 
+        break;
+        
+        case CUBE_BOTTOM_RIGHT :
+            xt = tx - ROAD_WIDTH;
+            yt = ty + ROAD_THICK;
+            zt = tz + roadLong; 
+        break;
+        
+        default:
+            xt = 0;
+            yt = 0;
+            zt = 0; 
+        break;
+    }
+    
+    glPushMatrix();
+        glTranslated(xt, yt, zt);
+        glRotated(degree,0,1,0);
+        glTranslated(-xt, -yt, -zt);
+        cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
+    glPopMatrix();
+}
+
+static void curveRoad(double x, double y, double z,
+                 double dx, double dy, double dz,
+                 double th, double radius)
+{
+    glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D,_textureAsphalt);
+        
+           //  Save transformation
+           glPushMatrix();
+           //  Offset, scale and rotate
+           glTranslated(x,y,z);
+           glRotated(th,0,1,0);
+           glScaled(dx,dy,dz);
+        
+           //Texture repitition values
+           float texRepX = 1.0;
+           float texRepY = 1.0;
+        
+           texRepX = dx/texScale;
+           texRepY = dz/texScale;
+            int i;
+            float x_now; 
+                    float z_now;
+            const unsigned int triangles = 20; // number of triangles
+            const float twoPi = 2.0f * 3.14159f;
+            float delta = twoPi / triangles;
+            // Top
+            glBegin(GL_TRIANGLE_FAN);
+            glVertex3f(0.0,+1.0,0.0); // origin
+            for(i = 0; i <= triangles/4; i++){
+                x_now =  (radius * cos((i) *  delta));
+                z_now =  (radius * sin((i) * delta));
+                glTexCoord2f(x_now,z_now); glVertex3f(x_now,+1.0,z_now);
+            }
+            glEnd();
+            
+            // Bottom
+            glBegin(GL_TRIANGLE_FAN);
+            glVertex3f(0.0,-1.0,0.0); // origin
+            for(i = 0; i <= triangles/4; i++){
+                x_now =  (radius * cos((i) *  delta));
+                z_now =  (radius * sin((i) * delta));
+                glTexCoord2f(x_now,z_now); glVertex3f(x_now,-1.0,z_now);
+            }
+            glEnd();
+            
+            // Side Circular
+            glBegin(GL_TRIANGLE_STRIP);
+                for(i = 0; i <= triangles/4;i++) { 
+                    x_now =  (radius * cos((i) *  delta));
+                    z_now =  (radius * sin((i) * delta));
+                    glTexCoord2f(x_now,z_now); glVertex3f(x_now,+1.0,z_now);
+                    glTexCoord2f(x_now,z_now); glVertex3f(x_now,-1.0,z_now);
+                }
+            glEnd();
+        glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+}
+
+
+/*
+ *  OpenGL (GLUT) calls this routine to display the scene
+ */
+void display()
+{
+   //  Erase the window and the depth buffer
+   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+   //  Enable Z-buffering in OpenGL
+   glEnable(GL_DEPTH_TEST);
+
+   //  Enable Textures
+   glEnable(GL_TEXTURE_2D);
+
+   //  Undo previous transformations
+   glLoadIdentity();
+   
+   //  Light Position (Sun)
+   float Position[]  = {0 ,25 ,0,1.0};
+   
+   //  Enable lighting
+   glEnable(GL_LIGHTING);
+   
+   //  Location of viewer for specular calculations
+   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+
+   //  glColor sets ambient and diffuse color materials
+   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+   glEnable(GL_COLOR_MATERIAL);
+
+    //  Enable light 0 - Sun
+   glEnable(GL_LIGHT0);
+   
+   //  Set ambient, diffuse, specular components and position of light 0 (Sun)
+   glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
+   glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
+   glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+   glLightfv(GL_LIGHT0,GL_POSITION,Position);
+
+   //  Perspective - set eye position
+   if (mode)
+   {
+      double Ex = -2*dim*Sin(th)*Cos(ph);
+      double Ey = +2*dim        *Sin(ph);
+      double Ez = +2*dim*Cos(th)*Cos(ph);
+      
+//      printf("x:%d y:%d z:%d\n", Ex, Ey, Ez);
+      gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
+   }
+   //  First Person
+   else
+   {
+       
+//      refX = (dim * Sin(th)) + fpX;
+   	  refX = (dim * Sin(th));
+      refY = (dim * Sin(ph))+fpY;
+      //refZ = (dim * -Cos(th)) + fpZ;
+      refZ = (dim * -Cos(th));
+      
+//      gluLookAt(-3.5,10,2.3, refX,refY,refZ, 0,1,0);
+       
+//      centerX = (dim * Sin(th)) + fpX;
+//      centerY = (dim * Sin(ph));
+//      centerZ = (dim * -Cos(th)) + fpZ;
+//      gluLookAt(fpX,fpY,fpZ, centerX, centerY, centerZ, 0,1,0);
+//        gluLookAt(eyeX,eyeY,eyeZ, centerX, centerY, centerZ, 0,1,0);
+
+
+//      gluLookAt(fpX,fpY,fpZ, refX,refY,refZ, 0,1,0);
+	glRotated(-carRotate2,0,1,0);
+//	glRotated(90,0,1,0);
+	
+//    	glRotated(90,0,1,0);
+      gluLookAt(25.5+centerZIncrement,0.8,22-centerXIncrement, 25+centerZIncrement,refY,5-centerXIncrement, 0,1,0);
+   }
+
+   //  Draw scene =========================================================================================================
+   //  Skybox
+   skybox(64);
+   
+   //  Home
+//   drawHome();
+   
+//   drawXYBaseRectangle(3, 0, -2, 9, 0, 4);
+   
+//  pitstop(1, 0, -2);   
+//   pitstop(3, 0, -2);
+//   pitstop(-1, 0, -2);
+//          tx, ty, tz, long, rotate
+
+int index=0;
+int roadNum;
+
+glEnable(GL_TEXTURE_2D);
+	
+    glBindTexture(GL_TEXTURE_2D, _textureAsphalt);
+	glPushMatrix();
+	    glScaled(1.2,0,1.2);
+		for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
+		    straightRoad( circuit[index+0], //tx
+		                  circuit[index+1], //ty
+		                  circuit[index+2], //tz
+		                  circuit[index+3], //road long
+		                  circuit[index+4], //degree
+		                  circuit[index+5] //rotate pivot
+		                );  
+		    index += NUM_ROAD_PARAMS;
+		}
+	glPopMatrix();
+glDisable(GL_TEXTURE_2D);
+	
+	
+//index=0;
+//for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
+//    straightRoad( sidewalk[index+0], //tx
+//                  sidewalk[index+1], //ty
+//                  sidewalk[index+2], //tz
+//                  sidewalk[index+3], //road long
+//                  sidewalk[index+4], //degree
+//                  sidewalk[index+5], //rotate pivot
+//                  sidewalk[index+6]  //texture type
+//                );
+//                 
+//    index += NUM_ROAD_PARAMS;
+//}
+//curveRoad(0,0,0,2,0,2,0,5);
+
+//straightRoad(10, 0, 10, 10, -45, CUBE_TOP_LEFT  );
+//straightRoad(20, 0, 10, 10, 45, CUBE_TOP_RIGHT  );
+//straightRoad(30, 0, 10, 10, 45, CUBE_BOTTOM_LEFT  );
+//straightRoad(40, 0, 10, 10, 45, CUBE_BOTTOM_RIGHT  );
+
+//            cube(-40, 0, -50, ROAD_WIDTH, ROAD_THICK, 6, 0);
+//            
+//            cube(-55, 0, -57, ROAD_WIDTH, ROAD_THICK, 14, 0);
+            
+
+	
+    glPushMatrix();
+    	glTranslated(23,0,20);
+    	glRotated(90,0,1,0);
+	   //Red Car
+//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+		car(-1+centerXIncrement,0.2,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
+    glPopMatrix();
+
+   glutSwapBuffers();
+}
+
+
+
+/*
+ *  GLUT calls this routine when the window is resized
+ */
+void idle()
+{  
+   //  Tell GLUT it is necessary to redisplay the scene
+   glutPostRedisplay();
+}
+
+
+/*
+ *  GLUT calls this routine when an arrow key is pressed
+ */
+void special(int key,int x,int y)
+{
+   //  Right arrow key - increase angle by 5 degrees
+   if (key == GLUT_KEY_RIGHT)
+      th += 5;
+   //  Left arrow key - decrease angle by 5 degrees
+   else if (key == GLUT_KEY_LEFT)
+      th -= 5;
+   //  Up arrow key - increase elevation by 5 degrees
+   else if (key == GLUT_KEY_UP)
+      ph += 5;
+   //  Down arrow key - decrease elevation by 5 degrees
+   else if (key == GLUT_KEY_DOWN)
+      ph -= 5;
+   //  PageUp key - increase dim
+   else if (key == GLUT_KEY_PAGE_DOWN)
+      dim += 0.1;
+   //  PageDown key - decrease dim
+   else if (key == GLUT_KEY_PAGE_UP && dim>1)
+      dim -= 0.1;
+   th %= 360;
+   ph %= 360;
+   
+   //  Update projection
+   Project(fov,asp,dim);
+   //  Tell GLUT it is necessary to redisplay the scene
+   glutPostRedisplay();
+   printf("th:%d fov:%d ph:%d, refX:%f, refZ:%f, \n", th, fov, ph, refX, refZ);
+}
+
+/*
+ *  GLUT calls this routine when a key is pressed
+ */
+void key(unsigned char ch,int x,int y)
+{
+   //  Exit on ESC
+   if (ch == 27)
+      exit(0);
+   //  Reset view angle
+   else if (ch == '0')
+      th = ph = 0;
+   //  Toggle axes
+   else if (ch == 'x' || ch == 'X')
+      axes = 1-axes;
+   //  Switch projection mode
+   else if (ch == 'p' || ch == 'P')
+      mode = 1-mode;
+   //  Toggle light movement
+   else if (ch == 'm' || ch == 'M')
+      move = 1-move;
+   //  Change field of view angle
+   else if (ch == '-' && ch>1)
+      fov--;
+   else if (ch == '+' && ch<179)
+      fov++;
+    else if(ch == 'w' || ch == 'W')
+   {      
+          temp = xRotate;
+          xRotate = xRotate*Cos(0) + zRotate * Sin(0);
+          zRotate = -temp*Sin(0)+zRotate*Cos(0);
+          centerXIncrement += xRotate;
+          centerZIncrement += zRotate;
+          carRotate2 += 0;
+   }
+   
+   else if(ch == 's' || ch == 'S')
+   {      
+          temp = xRotate;
+          xRotate = xRotate*Cos(0) + zRotate * Sin(0);
+          zRotate = -temp*Sin(0)+zRotate*Cos(0);
+          centerXIncrement -= xRotate;
+          centerZIncrement -= zRotate;
+          carRotate2 += 0;
+   }
+     
+   else if(ch == 'd' || ch == 'D')
+      {
+          temp = xRotate;
+          xRotate = xRotate*Cos(-15) + zRotate * Sin(-15);
+          zRotate = -temp*Sin(-15)+zRotate*Cos(-15);       
+          centerXIncrement += xRotate;
+          centerZIncrement += zRotate;
+         
+          carRotate2 -= 15;
+         
+      }
+   else if(ch == 'a' || ch == 'A')
+   {
+          temp = xRotate;          
+          xRotate = xRotate*Cos(15) + zRotate * Sin(15);
+          zRotate = -temp*Sin(15)+zRotate*Cos(15);
+          centerXIncrement += xRotate;
+          centerZIncrement += zRotate;
+          carRotate2 += 15;    
+   }  
+      
+   //  Reproject
+   Project(fov,asp,dim);
+   //  Animate if requested
+   glutIdleFunc(move?idle:NULL);
+   //  Tell GLUT it is necessary to redisplay the scene
+   glutPostRedisplay();
+}
+
+/*
+ *  GLUT calls this routine when the window is resized
+ */
+void reshape(int width,int height)
+{
+   //  Ratio of the width to the height of the window
+   asp = (height>0) ? (double)width/height : 1;
+   //  Set the viewport to the entire window
+   glViewport(0,0, width,height);
+   //  Set projection
+   Project(fov,asp,dim);
+}
+
+
+/*
+ *  Start up GLUT and tell it what to do
+ */
+int main(int argc,char* argv[])
+{
+   //  Initialize GLUT
+   glutInit(&argc,argv);
+   
+   //  Request double buffered, true color window with Z buffering at 600x600
+   glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
+   glutInitWindowSize(800,600);
+   glutCreateWindow("EAS 171511046");
+   
+   //  Set callbacks
+   glutDisplayFunc(display);
+   glutReshapeFunc(reshape);
+   glutSpecialFunc(special);
+   glutKeyboardFunc(key);
+   
+   // load the texture
+   initTexture();
+   
+   glutIdleFunc(idle);
+   
+   //  Pass control to GLUT so it can interact with the user
+   ErrCheck("init");
+   glutMainLoop();
+   return 0;
+}

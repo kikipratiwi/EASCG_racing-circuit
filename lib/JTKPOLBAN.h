@@ -24,6 +24,15 @@
 extern "C" {
 #endif
 
+//Road struct
+typedef struct{
+   double tx, 
+          ty, 
+          tz,
+          roadLong, 
+          degree;
+}Road;
+
 void Print(const char* format , ...);
 void Fatal(const char* format , ...);
 unsigned int LoadTexBMP(const char* file);

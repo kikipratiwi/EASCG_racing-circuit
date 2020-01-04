@@ -25,8 +25,8 @@
 #define Z_CENTER 0
 #define ROAD_WIDTH 5
 #define ROAD_LONG 1
-#define ROAD_THICK 0.3
-#define NUM_ROAD_PARAMS 7
+#define ROAD_THICK 0.15
+#define NUM_ROAD_PARAMS 6
 #define COUNT_ARRAY_ELEMENT(x)  (sizeof(x) / sizeof((x)[0]))
 #define CUBE_TOP_LEFT 1
 #define CUBE_TOP_RIGHT 2
@@ -35,26 +35,16 @@
 #define ROAD 1
 #define SIDEWALK 2
 
-//Road struct
-typedef struct Roads{
-   double tx, 
-             ty, 
-          tz,
-          roadLong, 
-          degree;
-}Road;
-
-
-
+//--original
 //int mode=0;       //  Projection mode
 //int th=110;         //  Azimuth of view angle
 //int ph=0;         //  Elevation of view angle
 //int fov=55;       //  Field of view (for perspective)
 
-int mode=0;       //  Projection mode
-int th=105;         //  Azimuth of view angle
-int ph=0;         //  Elevation of view angle
-int fov=55;       //  Field of view (for perspective)
+//int mode=0;       //  Projection mode
+//int th=105;         //  Azimuth of view angle
+//int ph=0;         //  Elevation of view angle
+//int fov=55;       //  Field of view (for perspective)
 
 //double fpX = 0;
 //double fpY = 0.7;
@@ -62,15 +52,32 @@ int fov=55;       //  Field of view (for perspective)
 //heli view---------------------------------
 //int mode=1;       //  Projection mode
 //int th=0;         //  Azimuth of view angle
-//int fov=143;       //  Field of view (for perspective)
-////int fov=112;       //  Field of view (for perspective)
+//int fov=117;       //  Field of view (for perspective)
 //int ph=90;         //  Elevation of view angle
+
+//int mode=1;       //  Projection mode
+//int th=100;         //  Azimuth of view angle
+//int fov=75;       //  Field of view (for perspective)
+//int ph=45;         //  Elevation of view angle
+
+//int mode=1;       //  Projection mode
+//int th=0;         //  Azimuth of view angle
+//int fov=117;       //  Field of view (for perspective)
+//int ph=0;         //  Elevation of view angle
 //------------------------------------------
+int mode=0;       //  Projection mode
+int th=-10;         //  Azimuth of view angle
+int fov=117;       //  Field of view (for perspective)
+int ph=0;         //  Elevation of view angle
+
+
+
+
 int move=1;       //  Move light
 int axes=0;       //  Display axes
 int light=1;      //  Lighting
 double asp=1.333;  //  Aspect ratio
-double dim=8.0;   //  Size of world
+double dim=20.0;   //  Size of world
 
 // Light values
 int one       =   1;  // Unit value
@@ -121,36 +128,47 @@ float Specular[]  = {0,0,0,1.0};
 ////straightRoad(40, 0, -50 0);
 //
 ////Circuit
-//Road circuit[] ={road1};
-double circuit[] = {
-    
-    
+//Road circuit[] ={
+//	
+//};
+double circuit[] = { 
 //     tx,  ty, tz,  roadLong, degree, rotate pivot
-    20,        0, (30-20),   21,   0, 0, ROAD,                //1   
-    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, ROAD, //2
-    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, ROAD, //3
-     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT, ROAD,     //4
-     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT, ROAD,     //5
-     -10.4,     0, (4.0),    15.45,   0, 0, ROAD,                 //6
-     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT, ROAD,     //7
-     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT, ROAD,      //8
+    20,        Y_CENTER, (9.9),   21,   0, 0,                //1   
+    (22.6),  Y_CENTER, (-32.5), 50,  45, CUBE_BOTTOM_RIGHT, //2
+    (-5.5),   Y_CENTER, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, //3
+     (-45.5),  Y_CENTER, (-20.86),      17.64,  45, CUBE_TOP_LEFT,     //4
+     (-30.5),    Y_CENTER, (-11.4),      19.5,  30, CUBE_TOP_LEFT,     //5
+     -11.39,     Y_CENTER, (3.0),    15.45,   0, 0,                 //6
+     -19.55,    Y_CENTER, (17.65),    14.45,  30, CUBE_TOP_LEFT,     //7
+     -38,    Y_CENTER, (55),      29,  90, CUBE_TOP_LEFT      //8
 };
 
 double sidewalk[] = {
-    
-    
 //     tx,  ty, tz,  roadLong, degree, rotate pivot
-    20,        0, (30-20),   21,   0, 0, SIDEWALK,                //1   
-    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, SIDEWALK, //2
-    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, SIDEWALK, //3
-     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT, SIDEWALK,     //4
-     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT, SIDEWALK,     //5
-     -10.4,     0, (4.0),    15.45,   0, 0, SIDEWALK,                 //6
-     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT, SIDEWALK,     //7
-     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT, SIDEWALK,      //8
+    20,        0, (30-20),   21,   0, 0,                //1   
+    (20+2.6),  0, (30-62.5), 50,  45, CUBE_BOTTOM_RIGHT, //2
+    (-5.5),   0, (-34),  17.4,  90, CUBE_BOTTOM_RIGHT, //3
+     (-45),  0, (-20.5),      17.64,  45, CUBE_TOP_LEFT,     //4
+     (-30.65),    0, (-11.35),      20.45,  30, CUBE_TOP_LEFT,     //5
+     -10.4,     0, (4.0),    15.45,   0, 0,                 //6
+     -18.9,    0, (18.1),    14.45,  30, CUBE_TOP_LEFT,     //7
+     -37,    0, (54.6),      28,  90, CUBE_TOP_LEFT      //8
 };
 
 size_t circuitSize = COUNT_ARRAY_ELEMENT(circuit);
+
+
+int refreshMills = 15;
+unsigned int ID;
+float _angle = 0.0;
+
+
+float centerXIncrement = 0;
+float centerZIncrement = 0;
+float xRotate = 0.5;
+float zRotate = 0;
+float carRotate2 = 0;
+float temp;
 
 
 GLuint    _textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
@@ -166,20 +184,6 @@ GLuint    _textureBrick, _textureFence, _textureStone, _textureConcrete,
         _textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
         _textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow,
 		_textureSand, _textureCement, _textureSquareStone, _textureHexagonStone, _textureGreyStone;      
-
-int refreshMills = 15;
-unsigned int ID;
-float _angle = 0.0;
-
-
-float centerXIncrement = 0;
-float centerZIncrement = 0;
-float xRotate = 0.5;
-float zRotate = 0;
-float carRotate2 = 0;
-float temp;
-
-
 
 /*
  *  GLUT calls this routine at the first time to load the texture
@@ -218,6 +222,37 @@ void initTexture() {
 	_textureSquareStone = LoadTexBMP("texture/square-stone.bmp");
 	_textureHexagonStone = LoadTexBMP("texture/hexagon-stone.bmp");
 	_textureGreyStone = LoadTexBMP("texture/grey-stone.bmp");
+	
+	
+		_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
+	_textureGlass = LoadTexBMP("texture/glass.bmp");
+    _textureWheel = LoadTexBMP("texture/car-wheel.bmp");
+    _textureTire = LoadTexBMP("texture/tire-tread.bmp");
+    _textureWoodFence = LoadTexBMP("texture/wood-fence.bmp");
+	_textureGrass = LoadTexBMP("texture/grass.bmp");
+	_textureCinderBlock = LoadTexBMP("texture/cinder-block.bmp");
+	_textureCarGrill = LoadTexBMP("texture/car-grill.bmp");
+	_textureHeadLamp = LoadTexBMP("texture/headlamp.bmp");
+	_textureGlass = LoadTexBMP("texture/glass.bmp");
+	_textureCarbonFiber = LoadTexBMP("texture/carbon-fiber.bmp");
+	_textureSidewalk = LoadTexBMP("texture/sidewalk.bmp");
+	_textureGarageDoor = LoadTexBMP("texture/garage-door.bmp");
+	_textureWalkway = LoadTexBMP("texture/walkway.bmp");
+	_textureHedge = LoadTexBMP("texture/hedge.bmp");
+	_textureGreyBrick = LoadTexBMP("texture/grey-brick.bmp");
+	_textureWoodBeam = LoadTexBMP("texture/wood-beam.bmp");
+	_textureFrontDoor2 = LoadTexBMP("texture/front-door-2.bmp");
+	_textureWindow1 = LoadTexBMP("texture/window-1.bmp");
+	_textureSkyboxFront = LoadTexBMP("texture/skybox-front.bmp");
+	_textureSkyboxBack = LoadTexBMP("texture/skybox-back.bmp");
+	_textureSkyboxRight = LoadTexBMP("texture/skybox-right.bmp");
+	_textureSkyboxLeft = LoadTexBMP("texture/skybox-left.bmp");
+	_textureSkyboxTop = LoadTexBMP("texture/skybox-top.bmp");
+	_textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
+	_textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
+	_textureWhiteBrick = LoadTexBMP("texture/white-brick.bmp");
+	_textureMetalRoof = LoadTexBMP("texture/metal-roof.bmp");
+	_textureWarehouseWindow = LoadTexBMP("texture/warehouse-window.bmp");
 }
 
 static void drawZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -242,20 +277,20 @@ static void drawXYBaseRectangle(float x1, float y1, float z1, float x2, float y2
     glDisable(GL_TEXTURE_2D);
 }
 
-static void drawHome() {
+static void desert() {
    
-    /* =============================================Grass========================================= */
+    /* =============================================Sand========================================= */
     glPushMatrix();
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureGrass);
+        glBindTexture(GL_TEXTURE_2D, _textureSand);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glRotatef(_angle, 0.0, 1.0, 0.0);
         glBegin(GL_QUADS);
-            glTexCoord3f(0.0,70.0,1);  glVertex3f(-50,Y_CENTER,50); //scale 1/70
+            glTexCoord3f(0.0,1.0,1);  glVertex3f(-50,Y_CENTER,50); //scale 1/70
             glTexCoord3f(0.0,0.0,-1);  glVertex3f(-50,Y_CENTER,-50);
-            glTexCoord3f(70.0,0.0,-1);  glVertex3f(50,Y_CENTER,-50);
-            glTexCoord3f(70.0,70.0,1);  glVertex3f(50,Y_CENTER,50);
+            glTexCoord3f(1.0,0.0,-1);  glVertex3f(50,Y_CENTER,-50);
+            glTexCoord3f(1.0,1.0,1);  glVertex3f(50,Y_CENTER,50);
         glEnd();
         glDisable(GL_TEXTURE_2D);
     glPopMatrix();
@@ -961,28 +996,29 @@ static void car(double x,double y,double z,
 static void pitstop(double x, double y, double z)
 {
    glPushMatrix();
-   //  Offset
-   glTranslated(x,y,z);
-//   1, 0 ,-2
-   //Building
-//   texScale = 0.5;
-   glEnable(GL_TEXTURE_2D);
-   glBindTexture(GL_TEXTURE_2D,_textureSupport);
-   cube(0,1.6,0, 2,0.4,1, 0); //Top
-   glDisable(GL_TEXTURE_2D);
-   
-   glPushMatrix();
-   glEnable(GL_TEXTURE_2D);
-   glBindTexture(GL_TEXTURE_2D,_textureBrownBrick);
-   cube(-1.75,0.65,0, 0.25,0.55,1, 0); //Left
-   cube(1.75,0.65,0, 0.25,0.55,1, 0); //Right
-   cube(0,0.65,0, 0.2,0.55,1, 0); //Middle
-   glDisable(GL_TEXTURE_2D);
+	   //  Offset
+	   glTranslated(x,y,z);
+	//   1, 0 ,-2
+	   //Building
+	//   texScale = 0.5;
+	   glEnable(GL_TEXTURE_2D);
+	   glBindTexture(GL_TEXTURE_2D,_textureSupport);
+	   		cube(0,1.6,0, 2,0.4,1, 0); //Top
+	   glDisable(GL_TEXTURE_2D);
+	   
+	   glPushMatrix();
+		   glEnable(GL_TEXTURE_2D);
+		   glBindTexture(GL_TEXTURE_2D,_textureBrownBrick);
+			   cube(-1.75,0.65,0, 0.25,0.55,1, 0); //Left
+			   cube(1.75,0.65,0, 0.25,0.55,1, 0); //Right
+			   cube(0,0.65,0, 0.2,0.55,1, 0); //Middle
+	   		glDisable(GL_TEXTURE_2D);
+	   glPopMatrix();  
    glPopMatrix();   
   
 }
 
-static void straightRoad(double tx, double ty, double tz, double roadLong, double degree, int edge, int textureType)
+static void straightRoad(double tx, double ty, double tz, double roadLong, double degree, int edge)
 {
     int xt, yt, zt;
     
@@ -1018,28 +1054,12 @@ static void straightRoad(double tx, double ty, double tz, double roadLong, doubl
         break;
     }
     
-    GLuint _texture;
-    glEnable(GL_TEXTURE_2D);
-    	
-    	switch (textureType) {
-    		case ROAD:
-    			_texture = _textureAsphalt;
-    			break;
-    			
-    		case SIDEWALK:
-    			_texture = _textureSidewalk;
-    			break;
-		}
-    	
-        glBindTexture(GL_TEXTURE_2D, _texture);
-        
-        glPushMatrix();
-            glTranslated(xt, yt, zt);
-            glRotated(degree,0,1,0);
-            glTranslated(-xt, -yt, -zt);
-            cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
-        glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
+    glPushMatrix();
+        glTranslated(xt, yt, zt);
+        glRotated(degree,0,1,0);
+        glTranslated(-xt, -yt, -zt);
+        cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
+    glPopMatrix();
 }
 
 static void curveRoad(double x, double y, double z,
@@ -1101,6 +1121,51 @@ static void curveRoad(double x, double y, double z,
     glDisable(GL_TEXTURE_2D);
 }
 
+
+static void workshop(double x, double z, double th)
+{
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,0,z);
+   glRotated(th,0,1,0);
+
+   //Building - Brown Workshop
+   texScale = 0.5;
+   cube(0,1.6,0, 2,0.4,1, 0); //Top
+   cube(-1.75,0.65,0, 0.25,0.55,1, 0); //Left
+   cube(1.75,0.65,0, 0.25,0.55,1, 0); //Right
+   cube(0,0.65,0, 0.2,0.55,1, 0); //Middle
+
+   //"Floor" for brown workshop
+   glColor3f(0.7, 0.7, 0.7);
+   glBindTexture(GL_TEXTURE_2D,_textureSidewalk );
+   texScale = 1;
+   cube(0,-0.05,0.9, 2,0.15,0.1, 0);
+   
+   //Garage Doors
+   glColor3f(0.5, 0.5, 0.5);
+   glBindTexture(GL_TEXTURE_2D,_textureGarageDoor);
+   glBegin(GL_QUADS);
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+   //Left
+   glNormal3f(0, 0, 1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1.5, 0.1, 0.9);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.2, 0.1, 0.9);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.2, 1.2, 0.9);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1.5, 1.2, 0.9);
+   //Right
+   glNormal3f(0, 0, 1);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.2, 0.1, 0.9);
+   glTexCoord2f(texRepX,0.0); glVertex3f(1.5, 0.1, 0.9);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(1.5, 1.2, 0.9);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.2, 1.2, 0.9);
+   glEnd();
+
+   //Undo transformations
+   glPopMatrix();
+}
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -1181,8 +1246,8 @@ void display()
    //  Skybox
    skybox(64);
    
-   //  Home
-//   drawHome();
+   //  Desert
+//   desert();
    
 //   drawXYBaseRectangle(3, 0, -2, 9, 0, 4);
    
@@ -1191,25 +1256,28 @@ void display()
 //   pitstop(-1, 0, -2);
 //          tx, ty, tz, long, rotate
 
-
-
 int index=0;
 int roadNum;
-glPushMatrix();
-    glScaled(1.2,0,1.2);
-	for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
-	    straightRoad( circuit[index+0], //tx
-	                  circuit[index+1], //ty
-	                  circuit[index+2], //tz
-	                  circuit[index+3], //road long
-	                  circuit[index+4], //degree
-	                  circuit[index+5], //rotate pivot
-	                  circuit[index+6]  //texture type
-	                );
-	                 
-	    index += NUM_ROAD_PARAMS;
-	}
+
+glEnable(GL_TEXTURE_2D);
+	
+    glBindTexture(GL_TEXTURE_2D, _textureDirt);
+	glPushMatrix();
+//	    glScaled(-1,1,-1);
+		for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
+		    straightRoad( circuit[index+0], //tx
+		                  circuit[index+1], //ty
+		                  circuit[index+2], //tz
+		                  circuit[index+3], //road long
+		                  circuit[index+4], //degree
+		                  circuit[index+5] //rotate pivot
+		                );  
+		    index += NUM_ROAD_PARAMS;
+		}
 	glPopMatrix();
+glDisable(GL_TEXTURE_2D);
+	
+	
 //index=0;
 //for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
 //    straightRoad( sidewalk[index+0], //tx
@@ -1225,27 +1293,153 @@ glPushMatrix();
 //}
 //curveRoad(0,0,0,2,0,2,0,5);
 
-//straightRoad(10, 0, 10, 10, -45, CUBE_TOP_LEFT  );
-//straightRoad(20, 0, 10, 10, 45, CUBE_TOP_RIGHT  );
-//straightRoad(30, 0, 10, 10, 45, CUBE_BOTTOM_LEFT  );
-//straightRoad(40, 0, 10, 10, 45, CUBE_BOTTOM_RIGHT  );
 
-//            cube(-40, 0, -50, ROAD_WIDTH, ROAD_THICK, 6, 0);
-//            
-//            cube(-55, 0, -57, ROAD_WIDTH, ROAD_THICK, 14, 0);
-            
-
-	
     glPushMatrix();
     	glTranslated(23,0,20);
     	glRotated(90,0,1,0);
 	   //Red Car
 //	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
-		car(-1+centerXIncrement,0.2,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
+//		car(-1+centerXIncrement,0.2,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
     glPopMatrix();
 
+
+	 	
+	int tx,ty,tz;
+	tx=-2, ty=0, tz=-3;
+   //Brown house - player side
+	glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureBrick);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		    glPushMatrix();
+		        glTranslatef(tx,ty,tz);
+		//front
+			// front
+		        glBegin(GL_QUADS);  // Wall
+		            glTexCoord3f(0.0,2.0,0.1);  glVertex3f(-1,Y_CENTER,1.5); //A
+		            glTexCoord3f(2.0,2.0,0.1);  glVertex3f(1,Y_CENTER,1.5); //B
+		            glTexCoord3f(2.0,0.0,0.1);  glVertex3f(1,Y_CENTER+2,1); //C
+		            glTexCoord3f(0.0,0.0,0.1);  glVertex3f(-1,Y_CENTER+2,1); //D
+		        glEnd();
+		    
+			// right
+		
+		        glBegin(GL_TRIANGLES);  // top-back
+		            glTexCoord3f(0,1,1);  glVertex3f(1,Y_CENTER,1.5);
+		            glTexCoord3f(0.5,1,1);  glVertex3f(1.5,Y_CENTER,1.5);
+		            glTexCoord3f(0,3,1);  glVertex3f(1,Y_CENTER+2,1);
+		        glEnd();
+	
+			// left
+		        glBegin(GL_TRIANGLES);  // top-back
+		            glTexCoord3f(0,1,1);  glVertex3f(-1,Y_CENTER,1.5);
+		            glTexCoord3f(0.5,1,1);  glVertex3f(-1.5,Y_CENTER,1.5);
+		            glTexCoord3f(0,3,1);  glVertex3f(-1,Y_CENTER+2,1);
+		        glEnd();
+	    
+	    // back
+	    glPushMatrix();
+	        glTranslatef(0,0,-2.5);
+	        
+	        // front
+		        glBegin(GL_QUADS);  // Wall
+		            glTexCoord3f(0.0,2.0,0.1);  glVertex3f(-1,Y_CENTER,1); //A
+		            glTexCoord3f(2.0,2.0,0.1);  glVertex3f(1,Y_CENTER,1); //B
+		            glTexCoord3f(2.0,0.0,0.1);  glVertex3f(1,Y_CENTER+2,1.5); //C
+		            glTexCoord3f(0.0,0.0,0.1);  glVertex3f(-1,Y_CENTER+2,1.5); //D
+		        glEnd();
+		    
+			// right
+		        glBegin(GL_TRIANGLES);  // top-back
+		            glTexCoord3f(0,1,1);  glVertex3f(1,Y_CENTER,1);
+		            glTexCoord3f(0.5,1,1);  glVertex3f(1.5,Y_CENTER,1);
+		            glTexCoord3f(0,3,1);  glVertex3f(1,Y_CENTER+2,1.5);
+		        glEnd();
+	
+			// left
+		        glBegin(GL_TRIANGLES);  // top-back
+		            glTexCoord3f(0,1,1);  glVertex3f(-1,Y_CENTER,1);
+		            glTexCoord3f(0.5,1,1);  glVertex3f(-1.5,Y_CENTER,1);
+		            glTexCoord3f(0,3,1);  glVertex3f(-1,Y_CENTER+2,1.5);
+		        glEnd();
+	
+	    glPopMatrix();
+	    
+	    // right
+	    glPushMatrix();
+	        glTranslatef(2.5,0,0);
+	        
+	        	// front
+			        glBegin(GL_QUADS);  // Wall
+			            glTexCoord3f(0.0,2.0,0.1);  glVertex3f(-1,Y_CENTER,1); //A
+			            glTexCoord3f(2.0,2.0,0.1);  glVertex3f(-1,Y_CENTER,-1); //B
+			            glTexCoord3f(2.0,0.0,0.1);  glVertex3f(-1.5,Y_CENTER+2,-1); //C
+			            glTexCoord3f(0.0,0.0,0.1);  glVertex3f(-1.5,Y_CENTER+2,1); //D
+			        glEnd();
+			    
+				// right
+			        glBegin(GL_TRIANGLES);  // top-back
+			            glTexCoord3f(0,1,1);  glVertex3f(-1,Y_CENTER,-1);
+			            glTexCoord3f(0.5,1,1);  glVertex3f(-1,Y_CENTER,-1.5);
+			            glTexCoord3f(0,3,1);  glVertex3f(-1.5,Y_CENTER+2,-1);
+			        glEnd();
+		
+				// left
+			        glBegin(GL_TRIANGLES);  // top-back
+			            glTexCoord3f(0,1,1);  glVertex3f(-1,Y_CENTER,1);
+			            glTexCoord3f(0.5,1,1);  glVertex3f(-1,Y_CENTER,1.5);
+			            glTexCoord3f(0,3,1);  glVertex3f(-1.5,Y_CENTER+2,1);
+			        glEnd();
+	
+	    glPopMatrix();
+	    
+	    // left
+	        	// front
+			        glBegin(GL_QUADS);  // Wall
+			            glTexCoord3f(0.0,2.0,0.1);  glVertex3f(-1.5,Y_CENTER,1); //A
+			            glTexCoord3f(2.0,2.0,0.1);  glVertex3f(-1.5,Y_CENTER,-1); //B
+			            glTexCoord3f(2.0,0.0,0.1);  glVertex3f(-1,Y_CENTER+2,-1); //C
+			            glTexCoord3f(0.0,0.0,0.1);  glVertex3f(-1,Y_CENTER+2,1); //D
+			        glEnd();
+			
+			    
+				// right
+			        glBegin(GL_TRIANGLES);  // top-back
+			            glTexCoord3f(0,1,1);  glVertex3f(-1.5,Y_CENTER,-1);
+			            glTexCoord3f(0.5,1,1);  glVertex3f(-1.5,Y_CENTER,-1.5);
+			            glTexCoord3f(0,3,1);  glVertex3f(-1,Y_CENTER+2,-1);
+			        glEnd();
+		
+				// left
+			        glBegin(GL_TRIANGLES);  // top-back
+			            glTexCoord3f(0,1,1);  glVertex3f(-1.5,Y_CENTER,1);
+			            glTexCoord3f(0.5,1,1);  glVertex3f(-1.5,Y_CENTER,1.5);
+			            glTexCoord3f(0,3,1);  glVertex3f(-1,Y_CENTER+2,1);
+			        glEnd();
+	
+	    
+	    // top
+	    glPushMatrix();
+	        glTranslatef(0,2,0);
+	        
+	        	// front
+			        glBegin(GL_QUADS);  // Wall
+			            glTexCoord3f(0.0,2.0,0.1);  glVertex3f(-1,Y_CENTER,1); //A
+			            glTexCoord3f(2.0,2.0,0.1);  glVertex3f(1,Y_CENTER,1); //B
+			            glTexCoord3f(2.0,0.0,0.1);  glVertex3f(1,Y_CENTER,-1); //C
+			            glTexCoord3f(0.0,0.0,0.1);  glVertex3f(-1,Y_CENTER,-1); //D
+			        glEnd();
+			
+		glPopMatrix();
+	        
+	        
+	    glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
+        
    glutSwapBuffers();
 }
+
 
 
 
