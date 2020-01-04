@@ -164,7 +164,8 @@ GLuint    _textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
 
 GLuint    _textureBrick, _textureFence, _textureStone, _textureConcrete, 
         _textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
-        _textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow;      
+        _textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow,
+		_textureSand, _textureCement, _textureSquareStone, _textureHexagonStone, _textureGreyStone;      
 
 int refreshMills = 15;
 unsigned int ID;
@@ -211,6 +212,12 @@ void initTexture() {
     
     _textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
     _textureSidewalk = LoadTexBMP("texture/sidewalk.bmp");
+    
+	_textureSand =  LoadTexBMP("texture/sand.bmp");
+	_textureCement = LoadTexBMP("texture/cement.bmp");
+	_textureSquareStone = LoadTexBMP("texture/square-stone.bmp");
+	_textureHexagonStone = LoadTexBMP("texture/hexagon-stone.bmp");
+	_textureGreyStone = LoadTexBMP("texture/grey-stone.bmp");
 }
 
 static void drawZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
