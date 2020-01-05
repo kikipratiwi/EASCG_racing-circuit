@@ -39,7 +39,7 @@
 #define DAY 1
 #define NIGHT 0
 
-#define CAR_MOVE 30
+#define CAR_MOVE 60
 
 //--original
 //int mode=0;       //  Projection mode
@@ -126,7 +126,6 @@ float Specular[]  = {0,0,0,1.0};
 //====================
 
 float xPos = -6;
-int carRotate = 0;
 
 double xRotateTurn = 0;
 double ZRotateTurn = 0;
@@ -148,6 +147,16 @@ float xRotate = 0.5;
 float zRotate = 0;
 int step =0;
 float carRotate2 = 0;
+
+//Person Control
+float carRotateX = 0.5;
+float carRotateZ = 0;
+float carXIncrement = 0;
+float carZIncrement = 0;
+float carRotate = 0;
+
+//Race
+int start = 0;
 
 //====================
 
@@ -1428,14 +1437,45 @@ void carCom(){
 }
 
 void timer(int miliseconds) {
-	
-    carCom();
+	if(start)
+        carCom();
 	
 	glutPostRedisplay();
 	glutTimerFunc(CAR_MOVE, timer, 0);
 }
 
 /* END Car Computer */
+
+/* Controlled Car */
+void personControl(int direction){
+     int degree ,rotate, turn;
+     
+     switch(direction){
+        case 1:
+             degree = 0;             rotate = 1;             turn = 0;                  
+             break;                  
+             
+        case 2:
+             degree = 0;             rotate = -1;             turn = 0;             
+             break;
+             
+        case 3:
+             degree = -ANGLE_TURN;    rotate = 1;              turn = -ANGLE_TURN;
+             break;
+             
+        default :
+             degree = ANGLE_TURN;    rotate = 1;              turn = ANGLE_TURN;
+             break;   
+     }  
+        temp = carRotateX;
+        carRotateX = carRotateX*Cos(degree) + carRotateZ * Sin(degree);
+        carRotateZ = -temp*Sin(degree)+carRotateZ*Cos(degree);
+        carXIncrement += (carRotateX * rotate);
+        carZIncrement += (carRotateZ * rotate);
+        
+        carRotate += turn;  
+}
+
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -1505,12 +1545,11 @@ void display()
 
 
 //      gluLookAt(fpX,fpY,fpZ, refX,refY,refZ, 0,1,0);
-        glRotated(-carRotate2,0,1,0);
-//	glRotated(90,0,1,0);
-        
+        glRotated(-carRotate,0,1,0);
+//	glRotated(90,0,1,0);        
 //    	glRotated(90,0,1,0);
 //      gluLookAt(25.5+centerZIncrement,1,22-centerXIncrement, 22+centerZIncrement,refY,5-centerXIncrement, 0,1,0);
-        gluLookAt(17+centerXIncrement, 0 , 27+centerZIncrement, 25.510370+centerXIncrement,refY,26.641143+centerZIncrement, 0,1,0);
+        gluLookAt(17+carXIncrement, 0 , 29+carZIncrement, 25.510370+carXIncrement,refY,28.641143+carZIncrement, 0,1,0);
    }
 
    //  Draw scene =========================================================================================================
@@ -1608,16 +1647,21 @@ glDisable(GL_TEXTURE_2D);
 		
 		pyramid(15,0,15,2,2,2,0);
 		pyramid(10,-1,15,1,1,1,0);
-    //Car
-    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);    
     
-        glPushMatrix();
+                                     /* Opponent's Car*/
+    glPushMatrix();
     	glTranslated(18,0,25);
     	//glRotated(90,0,1,0);
 	   //Red Car
-//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);                                 
 		car(-1+centerXIncrement, -1 ,2+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
-		car(-1, -1 ,2, 1,1,1, 0, 1,0,0);
+    glPopMatrix();
+    
+                                     /* Controlled Car */
+    glPushMatrix();
+    	glTranslated(18,0,27);
+		car(-1+carXIncrement, -1 ,2+carZIncrement, 1,1,1, carRotate, 1,0,0);
     glPopMatrix();
         
    glutSwapBuffers();
@@ -1694,26 +1738,28 @@ void key(unsigned char ch,int x,int y)
       fov--;
    else if (ch == '+' && ch<179)
       fov++;
-    else if(ch == 'w' || ch == 'W')
-   {      
-          control(1);
+      
+   else if(ch == 'w' || ch == 'W')
+   {   
+       if(!start)   
+           start = 1;
+           
+       personControl(1);
    }
    
    else if(ch == 's' || ch == 'S')
    {      
-          control(2);
-
+       personControl(2);  
    }
-     
+      
    else if(ch == 'd' || ch == 'D')
       {
-          control(3);
-         
+        personControl(3);          
       }
    else if(ch == 'a' || ch == 'A')
    {
-          control(4);
-   }  
+         personControl(4);
+   }   
       
    //  Reproject
    Project(fov,asp,dim);
