@@ -35,9 +35,11 @@
 #define ROAD 1
 #define SIDEWALK 2
 
-#define ANGLE_TURN 6
+#define ANGLE_TURN 15
 #define DAY 1
 #define NIGHT 0
+
+#define CAR_MOVE 30
 
 //--original
 //int mode=0;       //  Projection mode
@@ -131,20 +133,21 @@ double ZRotateTurn = 0;
 double turnXInc = 0;
 double turnZInc = 0;
 
-//Camera
-float centerXIncrement = 0;
-float centerZIncrement = 0;
-float xRotate = 0.5;
-float zRotate = 0;
-
 //Camera First
 float camRotateX = 0.5;
 float camRotateZ = 0;
 float cameraXIncrement = 0;
 float cameraZIncrement = 0;
 
-float carRotate2 = 0;
 float temp;
+
+//Car Enemy
+float centerXIncrement = 0;
+float centerZIncrement = 0;
+float xRotate = 0.5;
+float zRotate = 0;
+int step =0;
+float carRotate2 = 0;
 
 //====================
 
@@ -615,6 +618,7 @@ static void wheel(double x,double y,double z,
 
    glColor3f(0.5,0.5,0.55);
    glBegin(GL_QUAD_STRIP);
+   
    for (th=0;th<=360;th+=s)
    {
       double ph = d-90;
@@ -630,7 +634,6 @@ static void wheel(double x,double y,double z,
    //  Undo transformations
    glPopMatrix();
 }
-
 
 static void bumper(double x,double y,double z,
                  double dx,double dy,double dz,
@@ -812,6 +815,7 @@ static void car(double x,double y,double z,
    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
 
+   glEnable(GL_TEXTURE_2D);
    //  Save transformation
    glPushMatrix();
    //  Offset
@@ -944,9 +948,9 @@ static void car(double x,double y,double z,
    glTexCoord2f(texRepX, texRepY); glVertex3f(-0.6,0.25,-0.35);
    glEnd();
 
-   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
-   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
-   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   //glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   //glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   //glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
 
    glBindTexture(GL_TEXTURE_2D,_textureCarbonFiber);
 
@@ -1356,6 +1360,83 @@ static void pyramid (double x,double y,double z,
    glPopMatrix();
 }
 
+/* Car Enemy Control */
+void control(int direction){
+     int degrees ,rotates, turn;
+     
+     switch(direction){
+        case 1:
+             degrees = 0;             rotates = 1;             turn = 0;      
+             step++;  
+             break;                  
+             
+        case 2:
+             degrees = 0;             rotates = -1;             turn = 0;             
+             step--;  
+             break;
+             
+        case 3:
+             degrees = -ANGLE_TURN;    rotates = 1;              turn = -ANGLE_TURN;
+             step++;
+             break;
+             
+        default :
+             degrees = ANGLE_TURN;    rotates = 1;              turn = ANGLE_TURN;
+             step++;  
+             break;   
+     }
+     
+        temp = xRotate;
+        xRotate = xRotate*Cos(degrees) + zRotate * Sin(degrees);
+        zRotate = -temp*Sin(degrees)+zRotate*Cos(degrees);
+        centerXIncrement += (xRotate * rotates);
+        centerZIncrement += (zRotate * rotates);
+        carRotate2 += turn;  
+}
+
+void carCom(){
+     int i;
+
+     if(step >= 5 && step < 11){
+             control(4);                  
+     }  
+     else if(step >= 38 && step < 41){
+             control(4);                  
+     }
+     else if(step >= 132 && step < 135){
+             control(4);                  
+     }
+     else if(step >= 154 && step < 162){
+             control(4);                  
+     }
+     else if(step >= 222 && step < 224){
+             control(3);                  
+     }
+     else if(step >= 246 && step < 248){
+             control(4);                  
+     }
+     else if(step >= 264 && step < 268){
+             control(4);                  
+     }
+     else if(step == 308)
+            step = 0;
+     else
+        control(1);
+   
+     printf("%d\n", step);      
+
+}
+
+void timer(int miliseconds) {
+	
+    carCom();
+	
+	glutPostRedisplay();
+	glutTimerFunc(CAR_MOVE, timer, 0);
+}
+
+/* END Car Computer */
+
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
@@ -1426,10 +1507,10 @@ void display()
 //      gluLookAt(fpX,fpY,fpZ, refX,refY,refZ, 0,1,0);
         glRotated(-carRotate2,0,1,0);
 //	glRotated(90,0,1,0);
-        printf("%f\n", refY);
+        
 //    	glRotated(90,0,1,0);
 //      gluLookAt(25.5+centerZIncrement,1,22-centerXIncrement, 22+centerZIncrement,refY,5-centerXIncrement, 0,1,0);
-        gluLookAt(16+centerXIncrement, 0 , 26.3+centerZIncrement, 24.510370+centerXIncrement,refY,25.941143+centerZIncrement, 0,1,0);
+        gluLookAt(17+centerXIncrement, 0 , 27+centerZIncrement, 25.510370+centerXIncrement,refY,26.641143+centerZIncrement, 0,1,0);
    }
 
    //  Draw scene =========================================================================================================
@@ -1531,11 +1612,12 @@ glDisable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_2D);
     
         glPushMatrix();
-    	glTranslated(18,0,24);
+    	glTranslated(18,0,25);
     	//glRotated(90,0,1,0);
 	   //Red Car
 //	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
-		car(-2+centerXIncrement, -1 ,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
+		car(-1+centerXIncrement, -1 ,2+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
+		car(-1, -1 ,2, 1,1,1, 0, 1,0,0);
     glPopMatrix();
         
    glutSwapBuffers();
@@ -1614,43 +1696,23 @@ void key(unsigned char ch,int x,int y)
       fov++;
     else if(ch == 'w' || ch == 'W')
    {      
-          temp = xRotate;
-          xRotate = xRotate*Cos(0) + zRotate * Sin(0);
-          zRotate = -temp*Sin(0)+zRotate*Cos(0);
-          centerXIncrement += xRotate;
-          centerZIncrement += zRotate;
-          carRotate2 += 0;
+          control(1);
    }
    
    else if(ch == 's' || ch == 'S')
    {      
-          temp = xRotate;
-          xRotate = xRotate*Cos(0) + zRotate * Sin(0);
-          zRotate = -temp*Sin(0)+zRotate*Cos(0);
-          centerXIncrement -= xRotate;
-          centerZIncrement -= zRotate;
-          carRotate2 += 0;
+          control(2);
+
    }
      
    else if(ch == 'd' || ch == 'D')
       {
-          temp = xRotate;
-          xRotate = xRotate*Cos(-15) + zRotate * Sin(-15);
-          zRotate = -temp*Sin(-15)+zRotate*Cos(-15);       
-          centerXIncrement += xRotate;
-          centerZIncrement += zRotate;
-         
-          carRotate2 -= 15;
+          control(3);
          
       }
    else if(ch == 'a' || ch == 'A')
    {
-          temp = xRotate;          
-          xRotate = xRotate*Cos(15) + zRotate * Sin(15);
-          zRotate = -temp*Sin(15)+zRotate*Cos(15);
-          centerXIncrement += xRotate;
-          centerZIncrement += zRotate;
-          carRotate2 += 15;    
+          control(4);
    }  
       
    //  Reproject
@@ -1691,7 +1753,8 @@ int main(int argc,char* argv[])
    glutDisplayFunc(display);
    glutReshapeFunc(reshape);
    glutSpecialFunc(special);
-   glutKeyboardFunc(key);
+   glutKeyboardFunc(key);   
+   glutTimerFunc(CAR_MOVE, timer, 0);
    
    // load the texture
    initTexture();
