@@ -35,6 +35,10 @@
 #define ROAD 1
 #define SIDEWALK 2
 
+#define ANGLE_TURN 6
+#define DAY 1
+#define NIGHT 0
+
 //--original
 //int mode=0;       //  Projection mode
 //int th=110;         //  Azimuth of view angle
@@ -60,15 +64,15 @@
 //int fov=75;       //  Field of view (for perspective)
 //int ph=45;         //  Elevation of view angle
 
-//int mode=1;       //  Projection mode
-//int th=0;         //  Azimuth of view angle
-//int fov=117;       //  Field of view (for perspective)
-//int ph=0;         //  Elevation of view angle
-//------------------------------------------
-int mode=0;       //  Projection mode
-int th=-10;         //  Azimuth of view angle
+int mode=1;       //  Projection mode
+int th=0;         //  Azimuth of view angle
 int fov=117;       //  Field of view (for perspective)
 int ph=0;         //  Elevation of view angle
+//------------------------------------------
+//int mode=0;       //  Projection mode
+//int th=-10;         //  Azimuth of view angle
+//int fov=117;       //  Field of view (for perspective)
+//int ph=0;         //  Elevation of view angle
 
 
 
@@ -82,8 +86,8 @@ double dim=20.0;   //  Size of world
 // Light values
 int one       =   1;  // Unit value
 int distance  =   25;  // Light distance
-int inc       =  10;  // Ball increment
-int smooth    =   1;  // Smooth/Flat shading
+// int inc       =  10;  // Ball increment
+// int smooth    =   1;  // Smooth/Flat shading
 int local     =   0;  // Local Viewer Model
 int emission  =  30;  // Emission intensity (%)
 int ambient   =  80;  // Ambient intensity (%)
@@ -93,6 +97,7 @@ int shininess =   0;  // Shininess (power of two)
 float shiny   =   1;  // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  = 13;  // Elevation of light
+int earth = DAY; //Day or Night
 
 int at0=100;      //  Constant  attenuation %
 int at1=20;        //  Linear    attenuation %
@@ -119,18 +124,33 @@ float Ambient[]   = {0.8 ,0.8 ,0.8 ,1.0};
 float Diffuse[]   = {1.0,1.0,1.0,1.0};
 float Specular[]  = {0,0,0,1.0};
 
+//====================
 
-//road1.ty = 0;
-//road1.tz = 30;
-//road1.roadLong = 5;
-//road1.degree = 0;
-//
-////straightRoad(40, 0, -50 0);
-//
-////Circuit
-//Road circuit[] ={
-//	
-//};
+float xPos = -6;
+int carRotate = 0;
+
+double xRotateTurn = 0;
+double ZRotateTurn = 0;
+double turnXInc = 0;
+double turnZInc = 0;
+
+//Camera
+float centerXIncrement = 0;
+float centerZIncrement = 0;
+float xRotate = 0.5;
+float zRotate = 0;
+
+//Camera First
+float camRotateX = 0.5;
+float camRotateZ = 0;
+float cameraXIncrement = 0;
+float cameraZIncrement = 0;
+
+float carRotate2 = 0;
+float temp;
+
+//====================
+
 double circuit[] = { 
 //     tx,  ty, tz,  roadLong, degree, rotate pivot
     20,        Y_CENTER, (9.9),   21,   0, 0,                //1   
@@ -158,17 +178,17 @@ double sidewalk[] = {
 size_t circuitSize = COUNT_ARRAY_ELEMENT(circuit);
 
 
-int refreshMills = 15;
-unsigned int ID;
-float _angle = 0.0;
+// int refreshMills = 15;
+// unsigned int ID;
 
+// //Camera/Eye
+// float centerXIncrement = 0;
+// float centerZIncrement = 0;
+// float xRotate = 0.5;
+// float zRotate = 0;
 
-float centerXIncrement = 0;
-float centerZIncrement = 0;
-float xRotate = 0.5;
-float zRotate = 0;
-float carRotate2 = 0;
-float temp;
+// float carRotate2 = 0;
+// float temp;
 
 
 GLuint    _textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
@@ -183,7 +203,8 @@ GLuint    _textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
 GLuint    _textureBrick, _textureFence, _textureStone, _textureConcrete, 
         _textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
         _textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow,
-		_textureSand, _textureCement, _textureSquareStone, _textureHexagonStone, _textureGreyStone;      
+		_textureSand, _textureCement, _textureSquareStone, _textureHexagonStone, _textureGreyStone,
+		_textureYellowBrick;      
 
 /*
  *  GLUT calls this routine at the first time to load the texture
@@ -217,14 +238,14 @@ void initTexture() {
     _textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
     _textureSidewalk = LoadTexBMP("texture/sidewalk.bmp");
     
-	_textureSand =  LoadTexBMP("texture/sand.bmp");
+	_textureSand =  LoadTexBMP("texture/sand-1 (3).bmp");
 	_textureCement = LoadTexBMP("texture/cement.bmp");
 	_textureSquareStone = LoadTexBMP("texture/square-stone.bmp");
 	_textureHexagonStone = LoadTexBMP("texture/hexagon-stone.bmp");
 	_textureGreyStone = LoadTexBMP("texture/grey-stone.bmp");
 	
 	
-		_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
+	_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
 	_textureGlass = LoadTexBMP("texture/glass.bmp");
     _textureWheel = LoadTexBMP("texture/car-wheel.bmp");
     _textureTire = LoadTexBMP("texture/tire-tread.bmp");
@@ -253,6 +274,9 @@ void initTexture() {
 	_textureWhiteBrick = LoadTexBMP("texture/white-brick.bmp");
 	_textureMetalRoof = LoadTexBMP("texture/metal-roof.bmp");
 	_textureWarehouseWindow = LoadTexBMP("texture/warehouse-window.bmp");
+	
+	
+	_textureYellowBrick = LoadTexBMP("texture/yellow-brick.bmp");
 }
 
 static void drawZBaseRectangle(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -278,26 +302,28 @@ static void drawXYBaseRectangle(float x1, float y1, float z1, float x2, float y2
 }
 
 static void desert() {
-   
     /* =============================================Sand========================================= */
     glPushMatrix();
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, _textureSand);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glRotatef(_angle, 0.0, 1.0, 0.0);
         glBegin(GL_QUADS);
-            glTexCoord3f(0.0,1.0,1);  glVertex3f(-50,Y_CENTER,50); //scale 1/70
-            glTexCoord3f(0.0,0.0,-1);  glVertex3f(-50,Y_CENTER,-50);
-            glTexCoord3f(1.0,0.0,-1);  glVertex3f(50,Y_CENTER,-50);
-            glTexCoord3f(1.0,1.0,1);  glVertex3f(50,Y_CENTER,50);
+//            glTexCoord3f(0.0,1.0,1);  glVertex3f(-50,Y_CENTER-0.1,50); //scale 1/70
+//            glTexCoord3f(0.0,0.0,-1);  glVertex3f(-50,Y_CENTER-0.1,-50);
+//            glTexCoord3f(1.0,0.0,-1);  glVertex3f(50,Y_CENTER-0.1,-50);
+//            glTexCoord3f(1.0,1.0,1);  glVertex3f(50,Y_CENTER-0.1,50);
+            
+            glTexCoord3f(0.0,30.0,1);  glVertex3f(-50,-1.5,50); //scale 1/70
+            glTexCoord3f(0.0,0.0,-1);  glVertex3f(-50,-1.5,-50);
+            glTexCoord3f(30.0,0.0,-1);  glVertex3f(50,-1.5,-50);
+            glTexCoord3f(30.0,30.0,1);  glVertex3f(50,-1.5,50);
         glEnd();
         glDisable(GL_TEXTURE_2D);
     glPopMatrix();
      
 }
 
-//            cube(tx, ty, tz, ROAD_WIDTH, ROAD_THICK, roadLong, 0);
 static void cube(double x,double y,double z,
                  double dx,double dy,double dz,
                  double th) {
@@ -1167,155 +1193,19 @@ static void workshop(double x, double z, double th)
    glPopMatrix();
 }
 
-/*
- *  OpenGL (GLUT) calls this routine to display the scene
- */
-void display()
-{
-   //  Erase the window and the depth buffer
-   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-   //  Enable Z-buffering in OpenGL
-   glEnable(GL_DEPTH_TEST);
+static void house(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th) {
+   //  Save transformation ===============================================================================================
+   glPushMatrix();
+    
+      //  Offset, scale and rotate
+      glTranslated(x,y,z);
+      glRotated(th,0,1,0);
+      glScaled(dx,dy,dz);
 
-   //  Enable Textures
-   glEnable(GL_TEXTURE_2D);
-
-   //  Undo previous transformations
-   glLoadIdentity();
-   
-   //  Light Position (Sun)
-   float Position[]  = {0 ,25 ,0,1.0};
-   
-   //  Enable lighting
-   glEnable(GL_LIGHTING);
-   
-   //  Location of viewer for specular calculations
-   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
-
-   //  glColor sets ambient and diffuse color materials
-   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-   glEnable(GL_COLOR_MATERIAL);
-
-    //  Enable light 0 - Sun
-   glEnable(GL_LIGHT0);
-   
-   //  Set ambient, diffuse, specular components and position of light 0 (Sun)
-   glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
-   glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
-   glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
-   glLightfv(GL_LIGHT0,GL_POSITION,Position);
-
-   //  Perspective - set eye position
-   if (mode)
-   {
-      double Ex = -2*dim*Sin(th)*Cos(ph);
-      double Ey = +2*dim        *Sin(ph);
-      double Ez = +2*dim*Cos(th)*Cos(ph);
-      
-//      printf("x:%d y:%d z:%d\n", Ex, Ey, Ez);
-      gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
-   }
-   //  First Person
-   else
-   {
-       
-//      refX = (dim * Sin(th)) + fpX;
-   	  refX = (dim * Sin(th));
-      refY = (dim * Sin(ph))+fpY;
-      //refZ = (dim * -Cos(th)) + fpZ;
-      refZ = (dim * -Cos(th));
-      
-//      gluLookAt(-3.5,10,2.3, refX,refY,refZ, 0,1,0);
-       
-//      centerX = (dim * Sin(th)) + fpX;
-//      centerY = (dim * Sin(ph));
-//      centerZ = (dim * -Cos(th)) + fpZ;
-//      gluLookAt(fpX,fpY,fpZ, centerX, centerY, centerZ, 0,1,0);
-//        gluLookAt(eyeX,eyeY,eyeZ, centerX, centerY, centerZ, 0,1,0);
-
-
-//      gluLookAt(fpX,fpY,fpZ, refX,refY,refZ, 0,1,0);
-	glRotated(-carRotate2,0,1,0);
-//	glRotated(90,0,1,0);
-	
-//    	glRotated(90,0,1,0);
-      gluLookAt(25.5+centerZIncrement,0.8,22-centerXIncrement, 25+centerZIncrement,refY,5-centerXIncrement, 0,1,0);
-   }
-
-   //  Draw scene =========================================================================================================
-   //  Skybox
-   skybox(64);
-   
-   //  Desert
-//   desert();
-   
-//   drawXYBaseRectangle(3, 0, -2, 9, 0, 4);
-   
-//  pitstop(1, 0, -2);   
-//   pitstop(3, 0, -2);
-//   pitstop(-1, 0, -2);
-//          tx, ty, tz, long, rotate
-
-int index=0;
-int roadNum;
-
-glEnable(GL_TEXTURE_2D);
-	
-    glBindTexture(GL_TEXTURE_2D, _textureDirt);
-	glPushMatrix();
-//	    glScaled(-1,1,-1);
-		for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
-		    straightRoad( circuit[index+0], //tx
-		                  circuit[index+1], //ty
-		                  circuit[index+2], //tz
-		                  circuit[index+3], //road long
-		                  circuit[index+4], //degree
-		                  circuit[index+5] //rotate pivot
-		                );  
-		    index += NUM_ROAD_PARAMS;
-		}
-	glPopMatrix();
-glDisable(GL_TEXTURE_2D);
-	
-	
-//index=0;
-//for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
-//    straightRoad( sidewalk[index+0], //tx
-//                  sidewalk[index+1], //ty
-//                  sidewalk[index+2], //tz
-//                  sidewalk[index+3], //road long
-//                  sidewalk[index+4], //degree
-//                  sidewalk[index+5], //rotate pivot
-//                  sidewalk[index+6]  //texture type
-//                );
-//                 
-//    index += NUM_ROAD_PARAMS;
-//}
-//curveRoad(0,0,0,2,0,2,0,5);
-
-
-    glPushMatrix();
-    	glTranslated(23,0,20);
-    	glRotated(90,0,1,0);
-	   //Red Car
-//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
-//		car(-1+centerXIncrement,0.2,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
-    glPopMatrix();
-
-
-	 	
-	int tx,ty,tz;
-	tx=-2, ty=0, tz=-3;
-   //Brown house - player side
-	glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureBrick);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		
-		    glPushMatrix();
-		        glTranslatef(tx,ty,tz);
 		//front
-			// front
+			// center
 		        glBegin(GL_QUADS);  // Wall
 		            glTexCoord3f(0.0,2.0,0.1);  glVertex3f(-1,Y_CENTER,1.5); //A
 		            glTexCoord3f(2.0,2.0,0.1);  glVertex3f(1,Y_CENTER,1.5); //B
@@ -1324,7 +1214,6 @@ glDisable(GL_TEXTURE_2D);
 		        glEnd();
 		    
 			// right
-		
 		        glBegin(GL_TRIANGLES);  // top-back
 		            glTexCoord3f(0,1,1);  glVertex3f(1,Y_CENTER,1.5);
 		            glTexCoord3f(0.5,1,1);  glVertex3f(1.5,Y_CENTER,1.5);
@@ -1342,7 +1231,7 @@ glDisable(GL_TEXTURE_2D);
 	    glPushMatrix();
 	        glTranslatef(0,0,-2.5);
 	        
-	        // front
+	        // center
 		        glBegin(GL_QUADS);  // Wall
 		            glTexCoord3f(0.0,2.0,0.1);  glVertex3f(-1,Y_CENTER,1); //A
 		            glTexCoord3f(2.0,2.0,0.1);  glVertex3f(1,Y_CENTER,1); //B
@@ -1402,7 +1291,6 @@ glDisable(GL_TEXTURE_2D);
 			            glTexCoord3f(2.0,0.0,0.1);  glVertex3f(-1,Y_CENTER+2,-1); //C
 			            glTexCoord3f(0.0,0.0,0.1);  glVertex3f(-1,Y_CENTER+2,1); //D
 			        glEnd();
-			
 			    
 				// right
 			        glBegin(GL_TRIANGLES);  // top-back
@@ -1434,8 +1322,226 @@ glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
 	        
 	        
-	    glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+}
+
+static void pyramid (double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th) {
+   //  Save transformation ===============================================================================================
+   glPushMatrix();
+      //  Offset, scale and rotate
+      glTranslated(x,y+0.4,z);
+      glRotated(th,0,1,0);
+      glScaled(dx,dy,dz);
+
+	glBegin(GL_TRIANGLES);           // Begin drawing the pyramid with 4 triangles
+      // Front
+      glTexCoord3f(0,1,1); glVertex3f( 0.0f, 1.0f, 0.0f); //A
+      glTexCoord3f(-1,-1,1); glVertex3f(-1.0f, -1.0f, 1.0f);
+      glTexCoord3f(1,-1,1); glVertex3f(1.0f, -1.0f, 1.0f);
+ 
+      // Right
+      glTexCoord3f(0,1,1);   glVertex3f(0.0f, 1.0f, 0.0f);
+      glTexCoord3f(-1,-1,1); glVertex3f(1.0f, -1.0f, 1.0f);
+      glTexCoord3f(1,-1,1);  glVertex3f(1.0f, -1.0f, -1.0f);
+ 
+      // Back
+      glTexCoord3f(0,1,1);   glVertex3f(0.0f, 1.0f, 0.0f);
+      glTexCoord3f(-1,-1,1); glVertex3f(1.0f, -1.0f, -1.0f);
+      glTexCoord3f(1,-1,1);  glVertex3f(-1.0f, -1.0f, -1.0f);
+ 
+      // Left
+      glTexCoord3f(0,1,1);   glVertex3f( 0.0f, 1.0f, 0.0f);
+      glTexCoord3f(-1,-1,1); glVertex3f(-1.0f,-1.0f,-1.0f);
+      glTexCoord3f(1,-1,1);  glVertex3f(-1.0f,-1.0f, 1.0f);
+   glEnd();   // Done drawing the pyramid
+   
+   glPopMatrix();
+}
+
+/*
+ *  OpenGL (GLUT) calls this routine to display the scene
+ */
+void display()
+{
+   //  Erase the window and the depth buffer
+   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+   //  Enable Z-buffering in OpenGL
+   glEnable(GL_DEPTH_TEST);
+
+   //  Enable Textures
+   glEnable(GL_TEXTURE_2D);
+
+   //  Undo previous transformations
+   glLoadIdentity();
+   
+   //  Light Position (Sun)
+   float Position[]  = {0 ,25 ,0,1.0};
+   
+   //  Enable lighting
+   glEnable(GL_LIGHTING);
+   
+   //  Location of viewer for specular calculations
+   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+
+   //  glColor sets ambient and diffuse color materials
+   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+   glEnable(GL_COLOR_MATERIAL);
+
+   //  Enable light 0 - Sun
+   glEnable(GL_LIGHT0);
+   
+   //  Set ambient, diffuse, specular components and position of light 0 (Sun)
+   glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
+   glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
+   glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+   glLightfv(GL_LIGHT0,GL_POSITION,Position);
+
+   //  Perspective - set eye position
+   if (mode)
+   {
+      double Ex = -2*dim*Sin(th)*Cos(ph);
+      double Ey = +2*dim        *Sin(ph);
+      double Ez = +2*dim*Cos(th)*Cos(ph);
+      
+//      printf("x:%d y:%d z:%d\n", Ex, Ey, Ez);
+      gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
+   }
+   //  First Person
+   else
+   {
+       
+//      refX = (dim * Sin(th)) + fpX;
+   	  refX = (dim * Sin(th));
+      refY = (dim * Sin(ph))+fpY;
+      //refZ = (dim * -Cos(th)) + fpZ;
+      refZ = (dim * -Cos(th));
+      
+//      gluLookAt(-3.5,10,2.3, refX,refY,refZ, 0,1,0);
+       
+//      centerX = (dim * Sin(th)) + fpX;
+//      centerY = (dim * Sin(ph));
+//      centerZ = (dim * -Cos(th)) + fpZ;
+//      gluLookAt(fpX,fpY,fpZ, centerX, centerY, centerZ, 0,1,0);
+//        gluLookAt(eyeX,eyeY,eyeZ, centerX, centerY, centerZ, 0,1,0);
+
+
+//      gluLookAt(fpX,fpY,fpZ, refX,refY,refZ, 0,1,0);
+	glRotated(-carRotate2,0,1,0);
+//	glRotated(90,0,1,0);
+	
+//    	glRotated(90,0,1,0);
+      gluLookAt(25.5+centerZIncrement,1,22-centerXIncrement, 25+centerZIncrement,refY-0.5,5-centerXIncrement, 0,1,0);
+   }
+
+   //  Draw scene =========================================================================================================
+   //  Skybox
+   skybox(64);
+   
+//   glPushMatrix();
+//      glEnable(GL_LIGHT1);
+//      float amb[4] = {0,0,0,0};
+//      float dif[4] = {0.8,0,0,1};
+//      float spec[4] = {0,0,0,1};
+//      float pos[4] = {-0.2,5,-3,1.0};
+//      //Red Light
+//      glLightfv(GL_LIGHT1,GL_AMBIENT ,amb);
+//      glLightfv(GL_LIGHT1,GL_DIFFUSE ,dif);
+//      glLightfv(GL_LIGHT1,GL_SPECULAR,spec);
+//      glLightfv(GL_LIGHT1,GL_POSITION,pos);
+//
+//      glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);
+//      glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
+//      glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
+//
+//      //Red Light
+//      float redEm[4] = {0.8, 0, 0, 1.0};
+//      glMaterialf(GL_FRONT,GL_SHININESS,0);
+//      glMaterialfv(GL_FRONT,GL_SPECULAR,redEm);
+//      glMaterialfv(GL_FRONT,GL_EMISSION,redEm);
+//      glColor3f(0.5, 0, 0);
+//      cube(-0.2,5,-3, 0.07,0.02,0.1, 0);
+//   glPopMatrix();
+   
+   //  Desert
+   desert();
+   
+//   drawXYBaseRectangle(3, 0, -2, 9, 0, 4);
+   
+//  pitstop(1, 0, -2);   
+//   pitstop(3, 0, -2);
+//   pitstop(-1, 0, -2);
+//          tx, ty, tz, long, rotate
+
+int index=0;
+int roadNum;
+
+glEnable(GL_TEXTURE_2D);
+	
+    glBindTexture(GL_TEXTURE_2D, _textureAsphalt);
+	glPushMatrix();
+//	    glScaled(-1,1,-1);
+		for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
+		    straightRoad( circuit[index+0], //tx
+		                  circuit[index+1], //ty
+		                  circuit[index+2], //tz
+		                  circuit[index+3], //road long
+		                  circuit[index+4], //degree
+		                  circuit[index+5] //rotate pivot
+		                );  
+		    index += NUM_ROAD_PARAMS;
+		}
+	glPopMatrix();
+glDisable(GL_TEXTURE_2D);
+	
+	
+//index=0;
+//for(roadNum=0; roadNum < circuitSize/NUM_ROAD_PARAMS; roadNum++) {
+//    straightRoad( sidewalk[index+0], //tx
+//                  sidewalk[index+1], //ty
+//                  sidewalk[index+2], //tz
+//                  sidewalk[index+3], //road long
+//                  sidewalk[index+4], //degree
+//                  sidewalk[index+5], //rotate pivot
+//                  sidewalk[index+6]  //texture type
+//                );
+//                 
+//    index += NUM_ROAD_PARAMS;
+//}
+//curveRoad(0,0,0,2,0,2,0,5);
+
+
+    glPushMatrix();
+    	glTranslated(23,0,20);
+    	glRotated(90,0,1,0);
+	   //Red Car
+//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+//		car(-1+centerXIncrement,0.2,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
+    glPopMatrix();
+
+   //Brown house - player side
+	glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureBrick);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		house(circuit[0]+10,0,20,1,1,1,0);
+
+    glDisable(GL_TEXTURE_2D);
+    
+    //Pyramid
+	glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		pyramid(-5,1,-5,3,3,3,40);
+		
+		pyramid(15,0,15,2,2,2,0);
+		pyramid(10,-1,15,1,1,1,0);
+
+    glDisable(GL_TEXTURE_2D);
         
    glutSwapBuffers();
 }
