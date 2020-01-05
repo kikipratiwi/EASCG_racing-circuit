@@ -65,8 +65,8 @@
 //int ph=45;         //  Elevation of view angle
 
 int mode=1;       //  Projection mode
-int th=0;         //  Azimuth of view angle
-int fov=117;       //  Field of view (for perspective)
+int th=105;         //  Azimuth of view angle
+int fov=100;       //  Field of view (for perspective)
 int ph=0;         //  Elevation of view angle
 //------------------------------------------
 //int mode=0;       //  Projection mode
@@ -74,14 +74,11 @@ int ph=0;         //  Elevation of view angle
 //int fov=117;       //  Field of view (for perspective)
 //int ph=0;         //  Elevation of view angle
 
-
-
-
 int move=1;       //  Move light
 int axes=0;       //  Display axes
 int light=1;      //  Lighting
 double asp=1.333;  //  Aspect ratio
-double dim=20.0;   //  Size of world
+double dim=12.0;   //  Size of world
 
 // Light values
 int one       =   1;  // Unit value
@@ -107,7 +104,7 @@ double fpMoveInc = 0.02; //Multiplier for how much to move each keystroke in FP 
 
 //First person camera location
 double fpX = 0;
-double fpY = 0.8;
+double fpY = 0;
 double fpZ = -0.3;
 
 //x, y, z for refrence point in glLookAt() for FP mode
@@ -1041,7 +1038,6 @@ static void pitstop(double x, double y, double z)
 	   		glDisable(GL_TEXTURE_2D);
 	   glPopMatrix();  
    glPopMatrix();   
-  
 }
 
 static void straightRoad(double tx, double ty, double tz, double roadLong, double degree, int edge)
@@ -1092,7 +1088,7 @@ static void curveRoad(double x, double y, double z,
                  double dx, double dy, double dz,
                  double th, double radius)
 {
-    glEnable(GL_TEXTURE_2D);
+//    glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D,_textureAsphalt);
         
            //  Save transformation
@@ -1428,16 +1424,17 @@ void display()
 
 
 //      gluLookAt(fpX,fpY,fpZ, refX,refY,refZ, 0,1,0);
-	glRotated(-carRotate2,0,1,0);
+        glRotated(-carRotate2,0,1,0);
 //	glRotated(90,0,1,0);
-	
+        printf("%f\n", refY);
 //    	glRotated(90,0,1,0);
-      gluLookAt(25.5+centerZIncrement,1,22-centerXIncrement, 25+centerZIncrement,refY-0.5,5-centerXIncrement, 0,1,0);
+//      gluLookAt(25.5+centerZIncrement,1,22-centerXIncrement, 22+centerZIncrement,refY,5-centerXIncrement, 0,1,0);
+        gluLookAt(16+centerXIncrement, 0 , 26.3+centerZIncrement, 24.510370+centerXIncrement,refY,25.941143+centerZIncrement, 0,1,0);
    }
 
    //  Draw scene =========================================================================================================
    //  Skybox
-   skybox(64);
+   skybox(100);
    
 //   glPushMatrix();
 //      glEnable(GL_LIGHT1);
@@ -1510,16 +1507,6 @@ glDisable(GL_TEXTURE_2D);
 //    index += NUM_ROAD_PARAMS;
 //}
 //curveRoad(0,0,0,2,0,2,0,5);
-
-
-    glPushMatrix();
-    	glTranslated(23,0,20);
-    	glRotated(90,0,1,0);
-	   //Red Car
-//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
-//		car(-1+centerXIncrement,0.2,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
-    glPopMatrix();
-
    //Brown house - player side
 	glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, _textureBrick);
@@ -1540,8 +1527,16 @@ glDisable(GL_TEXTURE_2D);
 		
 		pyramid(15,0,15,2,2,2,0);
 		pyramid(10,-1,15,1,1,1,0);
-
+    //Car
     glDisable(GL_TEXTURE_2D);
+    
+        glPushMatrix();
+    	glTranslated(18,0,24);
+    	//glRotated(90,0,1,0);
+	   //Red Car
+//	   car(0,0.13,1.8, 1,1,1, 90, 0.8,0,0);
+		car(-2+centerXIncrement, -1 ,2.3+centerZIncrement, 1,1,1, carRotate2, 0,0,0.8);
+    glPopMatrix();
         
    glutSwapBuffers();
 }
@@ -1583,7 +1578,7 @@ void special(int key,int x,int y)
    else if (key == GLUT_KEY_PAGE_UP && dim>1)
       dim -= 0.1;
    th %= 360;
-   ph %= 360;
+  // ph %= 360;
    
    //  Update projection
    Project(fov,asp,dim);
