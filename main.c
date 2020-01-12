@@ -268,7 +268,7 @@ void dessert(double x, double y, double z, double width){
 	glColor3f(1, 1, 1);       
 	glBindTexture(GL_TEXTURE_2D, _textureSand);    
 	glPushMatrix();
-		cube(x, y, z, width, 1, width, 0);
+		cube(x, y, z, width, 0.17, width, 0);
 	glPopMatrix();
 }
 
