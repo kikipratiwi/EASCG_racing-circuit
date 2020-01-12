@@ -65,7 +65,9 @@ GLuint	_textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
 
 GLuint	_textureBrick, _textureFence, _textureStone, _textureConcrete, 
 		_textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
-		_textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow;      
+		_textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow;   
+		
+GLuint	_textureSand, _textureYellowBrick;
 
 int refreshMills = 15;
 unsigned int ID;
@@ -95,7 +97,162 @@ void initTexture() {
 	_textureDirt = LoadTexBMP("texture/sidewalk.bmp");
 	_texturePebble = LoadTexBMP("texture/pebble.bmp");
 	_textureCeiling = LoadTexBMP("texture/ceiling.bmp");
-	_textureDiffuse = LoadTexBMP("texture/diffuse.bmp");  
+	_textureDiffuse = LoadTexBMP("texture/diffuse.bmp");
+	
+	_textureSand = LoadTexBMP("texture/sand.bmp");   
+	_textureYellowBrick = LoadTexBMP("texture/yellow-brick.bmp");   
+}
+
+
+
+static void cube(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th)
+{
+   //  Save transformation
+   glPushMatrix();
+   //  Offset, scale and rotate
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   //Texture repitition values
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+
+   //  Cube
+   glBegin(GL_QUADS);
+   //  Front
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f( 0, 0, 1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
+   //  Back
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f( 0, 0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
+   //  Right
+   texRepX = dz/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(+1, 0, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,+1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,+1);
+   //  Left
+   texRepX = dz/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(-1, 0, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,+1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,+1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+   //  Top
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glNormal3f( 0,+1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+   //  Bottom
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glNormal3f( 0,-one, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
+   //  End
+   glEnd();
+   //  Undo transofrmations
+   glPopMatrix();
+}
+
+
+
+static void skybox(float dim) {
+   // front
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxFront);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+	   glNormal3f(0, 0, -1);
+	   glTexCoord2f(1.0,0.0); glVertex3f(+dim,-dim, dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(+dim,+dim, dim);
+   glEnd();
+
+   // back
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxBack);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+	   glNormal3f(0, 0, 1);
+	   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, -dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(+dim,-dim, -dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(+dim,+dim, -dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, -dim);
+   glEnd();
+
+   // right
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxRight);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+	   glNormal3f(-1, 0, 0);
+	   glTexCoord2f(1.0,0.0); glVertex3f(dim,-dim, -dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(dim,-dim, +dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(dim,+dim, +dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(dim,+dim, -dim);
+   glEnd();
+
+   // left
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxLeft);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+	   glNormal3f(1, 0, 0);
+	   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, +dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, -dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, -dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, +dim);
+   glEnd();
+
+   // top
+   glBindTexture(GL_TEXTURE_2D,_textureSkyboxTop);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glBegin(GL_QUADS);
+	   glNormal3f(0, -1, 0);
+	   glTexCoord2f(1.0,0.0); glVertex3f(+dim,dim, +dim);
+	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,dim, +dim);
+	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,dim, -dim);
+	   glTexCoord2f(1.0,1.0); glVertex3f(+dim,dim, -dim);
+   glEnd();
+}
+
+
+void dessert(double x, double y, double z, double width){
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,1);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   
+	glColor3f(1, 1, 1);       
+	glBindTexture(GL_TEXTURE_2D, _textureSand);    
+	glPushMatrix();
+		cube(x, y, z, width, 1, width, 0);
+	glPopMatrix();
 }
 
 static void home() {
@@ -895,145 +1052,6 @@ static void home() {
     glDisable(GL_TEXTURE_2D);  	 
 }
 
-static void cube(double x,double y,double z,
-                 double dx,double dy,double dz,
-                 double th) {
-   //  Save transformation ===============================================================================================
-   glPushMatrix();
-	   //  Offset, scale and rotate
-	   glTranslated(x,y,z);
-	   glRotated(th,0,1,0);
-	   glScaled(dx,dy,dz);
-	
-	   //Texture repitition values
-	   float texRepX = 1.0;
-	   float texRepY = 1.0;
-	
-	   //  Cube ==============================================================================================================
-	   glBegin(GL_QUADS);
-		   //  Front
-		   texRepX = dx/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f( 0, 0, 1);
-		   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
-		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
-		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
-		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
-		   
-		   //  Back
-		   texRepX = dx/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f( 0, 0,-1);
-		   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
-		   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
-		   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
-		   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
-		   
-		   //  Right
-		   texRepX = dz/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f(+1, 0, 0);
-		   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,+1);
-		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
-		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
-		   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,+1);
-		   
-		   //  Left
-		   texRepX = dz/texScale;
-		   texRepY = dy/texScale;
-		   glNormal3f(-1, 0, 0);
-		   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
-		   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,+1);
-		   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,+1);
-		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
-		   
-		   //  Top
-		   texRepX = dx/texScale;
-		   texRepY = dz/texScale;
-		   glNormal3f( 0,+1, 0);
-		   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
-		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
-		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
-		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
-		   
-		   //  Bottom
-		   texRepX = dx/texScale;
-		   texRepY = dz/texScale;
-		   glNormal3f( 0,-one, 0);
-		   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
-		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
-		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
-		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
-		   
-	   //  End of Cube ====================================================================================================
-	   glEnd();
-	   
-   //  Undo transofrmations ===============================================================================================
-   glPopMatrix();
-}
-
-static void skybox(float dim) {
-   // front
-   glBindTexture(GL_TEXTURE_2D,_textureSkyboxFront);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-   glBegin(GL_QUADS);
-	   glNormal3f(0, 0, -1);
-	   glTexCoord2f(1.0,0.0); glVertex3f(+dim,-dim, dim);
-	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, dim);
-	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, dim);
-	   glTexCoord2f(1.0,1.0); glVertex3f(+dim,+dim, dim);
-   glEnd();
-
-   // back
-   glBindTexture(GL_TEXTURE_2D,_textureSkyboxBack);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-   glBegin(GL_QUADS);
-	   glNormal3f(0, 0, 1);
-	   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, -dim);
-	   glTexCoord2f(0.0,0.0); glVertex3f(+dim,-dim, -dim);
-	   glTexCoord2f(0.0,1.0); glVertex3f(+dim,+dim, -dim);
-	   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, -dim);
-   glEnd();
-
-   // right
-   glBindTexture(GL_TEXTURE_2D,_textureSkyboxRight);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-   glBegin(GL_QUADS);
-	   glNormal3f(-1, 0, 0);
-	   glTexCoord2f(1.0,0.0); glVertex3f(dim,-dim, -dim);
-	   glTexCoord2f(0.0,0.0); glVertex3f(dim,-dim, +dim);
-	   glTexCoord2f(0.0,1.0); glVertex3f(dim,+dim, +dim);
-	   glTexCoord2f(1.0,1.0); glVertex3f(dim,+dim, -dim);
-   glEnd();
-
-   // left
-   glBindTexture(GL_TEXTURE_2D,_textureSkyboxLeft);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-   glBegin(GL_QUADS);
-	   glNormal3f(1, 0, 0);
-	   glTexCoord2f(1.0,0.0); glVertex3f(-dim,-dim, +dim);
-	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,-dim, -dim);
-	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,+dim, -dim);
-	   glTexCoord2f(1.0,1.0); glVertex3f(-dim,+dim, +dim);
-   glEnd();
-
-   // top
-   glBindTexture(GL_TEXTURE_2D,_textureSkyboxTop);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-   glBegin(GL_QUADS);
-	   glNormal3f(0, -1, 0);
-	   glTexCoord2f(1.0,0.0); glVertex3f(+dim,dim, +dim);
-	   glTexCoord2f(0.0,0.0); glVertex3f(-dim,dim, +dim);
-	   glTexCoord2f(0.0,1.0); glVertex3f(-dim,dim, -dim);
-	   glTexCoord2f(1.0,1.0); glVertex3f(+dim,dim, -dim);
-   glEnd();
-}
-
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
@@ -1094,8 +1112,8 @@ void display()
    //  Skybox
    skybox(64);
    
-   //  Home
-   home();
+   //  Sand
+   dessert(1.5,-0.13,4,20);
    
    glutSwapBuffers();
 }
