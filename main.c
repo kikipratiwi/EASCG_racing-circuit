@@ -16,9 +16,12 @@
 
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F
+
+#define ANGLE_TURN 6
 #endif
 
 int mode	=	0;      //  Projection mode
+float thf   =   105;    //  Azimuth of view angle for first person
 int th		=	110;    //  Azimuth of view angle
 int ph		=	0;      //  Elevation of view angle
 int fov		=	55;     //  Field of view (for perspective)
@@ -39,13 +42,25 @@ float shiny   =   1;  // Shininess (value)
 
 //First person camera location
 double fpX = 0;
-double fpY = 0.7;
-double fpZ = -0.3;
+double fpY = 0.8;
+double fpZ = 0;
 
 //x, y, z for reference point in glLookAt() for FP mode
-double refX = 10;
+double refX = 0;
 double refY = 0;
 double refZ = 0;
+
+//Person Control
+float carRotateX = 0.5;
+float carRotateZ = 0;
+float carXIncrement = 0;
+float carZIncrement = 0;
+float carRotate = 0;
+
+float temp;
+
+//Race
+int start = 0;
 
 //Texture Variables
 int tMode = 0;
@@ -1189,10 +1204,13 @@ void display()
    //  First Person
    else
    {
-      refX = (dim * Sin(th)) + fpX;
-      refY = (dim * Sin(ph));
-      refZ = (dim * -Cos(th)) + fpZ;
-      gluLookAt(0,1,1, refX,refY,refZ, 0,1,0);
+      refX = ((dim * Sin(thf)) + fpX ) + carXIncrement;     
+      refY = (dim * Sin(ph))+ fpY;
+      refZ = (dim * -Cos(thf)) + fpZ + carZIncrement;
+      printf("%f\n", refY);
+   
+      glRotated(-carRotate,0,1,0);      
+         gluLookAt(-1+carXIncrement, 0.9 ,-2.7+carZIncrement , 8.210370+carXIncrement,refY,-3.058857+carZIncrement, 0,1,0);  
    }
 
    //  Draw scene =========================================================================================================
@@ -1218,6 +1236,35 @@ void idle()
 {  
    //  Tell GLUT it is necessary to redisplay the scene
    glutPostRedisplay();
+}
+
+void personControl(int direction){
+     int degree ,rotate, turn;
+     
+     switch(direction){
+        case 1:
+             degree = 0;             rotate = 1;             turn = 0;                  
+             break;                  
+             
+        case 2:
+             degree = 0;             rotate = -1;             turn = 0;             
+             break;
+             
+        case 3:
+             degree = -ANGLE_TURN;    rotate = 1;              turn = -ANGLE_TURN;
+             break;
+             
+        default :
+             degree = ANGLE_TURN;    rotate = 1;              turn = ANGLE_TURN;
+             break;   
+     }  
+        temp = carRotateX;
+        carRotateX = carRotateX*Cos(degree) + carRotateZ * Sin(degree);
+        carRotateZ = -temp*Sin(degree)+carRotateZ*Cos(degree);
+        carXIncrement += (carRotateX * rotate);
+        carZIncrement += (carRotateZ * rotate);
+        
+        carRotate += turn;  
 }
 
 /*
@@ -1264,6 +1311,23 @@ void key(unsigned char ch,int x,int y)
    //  Switch projection mode
    else if (ch == 'p' || ch == 'P')
       mode = 1-mode;
+   // Controll Red car
+   else if(ch == 'w' || ch == 'W') {      
+       if(!start)   
+           start = 1;
+             
+       personControl(1);
+   } else if(ch == 's' || ch == 'S') {      
+       personControl(2);  
+   } else if(ch == 'd' || ch == 'D') {
+       personControl(3);          
+   } else if(ch == 'a' || ch == 'A') {
+       personControl(4);
+   }   
+   
+   // Reset rotate after 360   
+   th %= 360;     
+      
    //  Reproject
    Project(fov,asp,dim);
    //  Tell GLUT it is necessary to redisplay the scene
