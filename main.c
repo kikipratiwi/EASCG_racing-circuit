@@ -35,6 +35,8 @@ int diffuse   = 100;  // Diffuse intensity (%)
 int specular  =   0;  // Specular intensity (%)
 int zh        =  90;  // Light azimuth
 
+float shiny   =   1;  // Shininess (value)
+
 //First person camera location
 double fpX = 0;
 double fpY = 0.7;
@@ -1052,6 +1054,91 @@ static void home() {
     glDisable(GL_TEXTURE_2D);  	 
 }
 
+static void support(double x, double y, double z)
+{
+   glBindTexture(GL_TEXTURE_2D,_textureSupport );
+   glPushMatrix();
+      glTranslated(x,y,z);
+      cube(0,-0.05,-0.5, 2,0.15,0.2, 0);
+   glPopMatrix();
+}
+
+static void road(double x, double y, double z)
+{
+   glBindTexture(GL_TEXTURE_2D,_textureAsphalt);
+   glPushMatrix();
+      glTranslated(x,y,z);
+      cube(0,-0.05,-0.5, 2,0.15,1, 0);
+   glPopMatrix();
+}
+
+static void pitstop(double x, double y, double z)
+{
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+           
+   glBindTexture(GL_TEXTURE_2D,_textureYellowBrick);
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+       //Building
+       cube(0,1.6,0, 2,0.4,1, 0); //Top   
+       glBindTexture(GL_TEXTURE_2D,_textureBrownBrick);
+       cube(-1.75,0.65,0, 0.25,0.55,1, 0); //Left
+       cube(1.75,0.65,0, 0.25,0.55,1, 0); //Right
+       cube(0,0.65,0, 0.2,0.55,1, 0); //Middle
+   glPopMatrix();   
+   
+   float texRepX = 1.0;
+   float texRepY = 1.0;   
+   //Door left
+   glBindTexture(GL_TEXTURE_2D,_textureYellowBrick);
+   glPushMatrix();
+      glTranslated(x,y,z);
+       glBegin(GL_QUADS);
+           //Left
+           glTexCoord2f(0.0,0.0); glVertex3f(-1.5, 0.1, 0.9);
+           glTexCoord2f(texRepX,0.0); glVertex3f(-0.2, 0.1, 0.9);
+           glTexCoord2f(texRepX,texRepY); glVertex3f(-0.2, 1.2, 0.9);
+           glTexCoord2f(0.0,texRepY); glVertex3f(-1.5, 1.2, 0.9);
+        glEnd();
+   glPopMatrix();  
+   //Door Right     
+   glPushMatrix();
+      glTranslated(x+1.7,y,z);
+       glBegin(GL_QUADS);         
+           //Left
+           glTexCoord2f(0.0,0.0); glVertex3f(-1.5, 0.1, 0.9);
+           glTexCoord2f(texRepX,0.0); glVertex3f(-0.2, 0.1, 0.9);
+           glTexCoord2f(texRepX,texRepY); glVertex3f(-0.2, 1.2, 0.9);
+           glTexCoord2f(0.0,texRepY); glVertex3f(-1.5, 1.2, 0.9);
+        glEnd();
+   glPopMatrix();
+   //Floor
+   glBindTexture(GL_TEXTURE_2D,_textureSidewalk );
+   glPushMatrix();
+      glTranslated(x,y,z);
+      cube(0,-0.05,0.9, 2,0.15,0.1, 0);
+   glPopMatrix();
+   
+   //Sidewalk
+   glPushMatrix();
+       glTranslated(x,0, 0);
+       cube(0,-0.05,z+1.5, 2,0.15,0.5, 0); // Along Street
+       glTranslated(0,0, 1);
+       cube(0,-0.05,z+1.5, 2,0.15,0.5, 0); // Along Street
+   glPopMatrix();
+   //
+   support(x,y, z+3.7);
+   //Road
+   road(x, y,z+4.91);
+   
+//      road(x, y,z+8);
+}
+
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
@@ -1114,6 +1201,12 @@ void display()
    
    //  Sand
    dessert(1.5,-0.13,4,20);
+   
+   //PitStop
+   pitstop(1, 0, -10);   
+   pitstop(5, 0, -10);
+   
+   
    
    glutSwapBuffers();
 }
