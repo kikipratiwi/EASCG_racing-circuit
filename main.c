@@ -473,6 +473,53 @@ static void pillar(double x,double y,double z,
 }
 
 
+static void pyramid (double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th) {
+   glDisable(GL_POLYGON_OFFSET_FILL);
+
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   
+   glColor3f(0.7, 0.7, 0.7);
+
+
+   //  Save transformation ===============================================================================================
+   glPushMatrix();
+      //  Offset, scale and rotate
+      glTranslated(x,y+0.4,z);
+      glRotated(th,0,1,0);
+      glScaled(dx,dy,dz);
+
+	glBegin(GL_TRIANGLES);           // Begin drawing the pyramid with 4 triangles
+      // Front
+      glTexCoord3f(0,1,1); glVertex3f( 0.0f, 1.0f, 0.0f); //A
+      glTexCoord3f(-1,-1,1); glVertex3f(-1.0f, -1.0f, 1.0f);
+      glTexCoord3f(1,-1,1); glVertex3f(1.0f, -1.0f, 1.0f);
+ 
+      // Right
+      glTexCoord3f(0,1,1);   glVertex3f(0.0f, 1.0f, 0.0f);
+      glTexCoord3f(-1,-1,1); glVertex3f(1.0f, -1.0f, 1.0f);
+      glTexCoord3f(1,-1,1);  glVertex3f(1.0f, -1.0f, -1.0f);
+ 
+      // Back
+      glTexCoord3f(0,1,1);   glVertex3f(0.0f, 1.0f, 0.0f);
+      glTexCoord3f(-1,-1,1); glVertex3f(1.0f, -1.0f, -1.0f);
+      glTexCoord3f(1,-1,1);  glVertex3f(-1.0f, -1.0f, -1.0f);
+ 
+      // Left
+      glTexCoord3f(0,1,1);   glVertex3f( 0.0f, 1.0f, 0.0f);
+      glTexCoord3f(-1,-1,1); glVertex3f(-1.0f,-1.0f,-1.0f);
+      glTexCoord3f(1,-1,1);  glVertex3f(-1.0f,-1.0f, 1.0f);
+   glEnd();   // Done drawing the pyramid
+   
+   glPopMatrix();
+}
+
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -590,6 +637,19 @@ void display()
    for(i=0; i<(gap*nPillar); i=i+gap) {
 		pillar(-18.5,-1,0.5+i,15,8,15,0);
    }
+   
+    //Pyramid
+	glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		pyramid(-8,Y_CENTER+2.5,7.5,3,3,3,0);
+		
+		pyramid(15,Y_CENTER+1.5,15,2,2,2,0);
+		pyramid(11,Y_CENTER+1,18,1,1,1,0);
+    glDisable(GL_TEXTURE_2D);  
+   
    
    glutSwapBuffers();
 }
