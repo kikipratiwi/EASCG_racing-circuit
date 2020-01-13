@@ -18,15 +18,20 @@
 #define GL_CLAMP_TO_EDGE 0x812F
 
 #define ANGLE_TURN 6
+#define Y_CENTER -0.13
+
+#define ROAD_WIDTH 2
+#define ROAD_THICK 0.15
 #endif
 
 int mode	=	0;      //  Projection mode
 float thf   =   105;    //  Azimuth of view angle for first person
-int th		=	110;    //  Azimuth of view angle
+//int th		=	110;    //  Azimuth of view angle
+int th		=	105;    //  Azimuth of view angle
 int ph		=	0;      //  Elevation of view angle
 int fov		=	55;     //  Field of view (for perspective)
 double asp	=	1.333;  //  Aspect ratio
-double dim	=	8;   	//  Size of world
+double dim	=	15;   	//  Size of world
 
 // Light values
 int one       =   1;  // Unit value
@@ -118,6 +123,9 @@ void initTexture() {
 	
 	_textureSand = LoadTexBMP("texture/sand.bmp");   
 	_textureYellowBrick = LoadTexBMP("texture/yellow-brick.bmp");   
+	
+	_textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
+	
 }
 
 
@@ -1154,6 +1162,39 @@ static void pitstop(double x, double y, double z)
 //      road(x, y,z+8);
 }
 
+	
+static void quads(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th)
+{
+   //  Save transformation
+   glPushMatrix();
+	   //  Offset, scale and rotate
+	   glTranslated(x,y,z);
+	   glRotated(th,0,1,0);
+	   glScaled(dx,dy,dz);
+	
+	   //Texture repitition values
+	   float texRepX = 1.0;
+	   float texRepY = 1.0;
+
+
+	   glBegin(GL_QUADS);
+		   texRepX = dx/texScale;
+		   texRepY = dz/texScale;
+		   glNormal3f( 0,+1, 0);
+		   
+		   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
+		   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
+		   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+		   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+	   glEnd();
+	   
+	//  Undo transofrmations
+   glPopMatrix();
+}
+
+
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
@@ -1218,11 +1259,41 @@ void display()
    skybox(64);
    
    //  Sand
-   dessert(1.5,-0.13,4,20);
+   dessert(0,Y_CENTER-0.1,0,20);
    
    //PitStop
-   pitstop(1, 0, -10);   
-   pitstop(5, 0, -10);
+//   pitstop(1, 0, -10);   
+//   pitstop(5, 0, -10);
+
+	glEnable(GL_TEXTURE_2D);
+	    glBindTexture(GL_TEXTURE_2D, _textureConcrete);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		quads(0,0,0,20,Y_CENTER+0.1,1,0);
+	
+    glDisable(GL_TEXTURE_2D);
+			
+	glEnable(GL_TEXTURE_2D);
+	    glBindTexture(GL_TEXTURE_2D, _textureOrangeConcrete);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		quads(0,0,0,1,Y_CENTER+0.1,20,0);
+	
+    glDisable(GL_TEXTURE_2D);
+    
+    glEnable(GL_TEXTURE_2D);
+	    glBindTexture(GL_TEXTURE_2D, _textureAsphalt);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		quads(-8,0,4,1,Y_CENTER+0.2,4,30);
+		quads(-3.1,0,9.8,1,Y_CENTER+0.2,4,50);
+		quads(2.2,0,12.15,3,Y_CENTER+0.2,1,0);
+		quads(6.4,0,8.9,1,Y_CENTER+0.2,4,-30);
+	
+    glDisable(GL_TEXTURE_2D);
    
    
    
