@@ -23,6 +23,10 @@
 #define ROAD_WIDTH 2
 #define ROAD_THICK 0.15
 #define PI 3.1415927
+
+#define DAY 1
+#define NIGHT 0
+
 #endif
 
 int mode	=	0;      //  Projection mode
@@ -45,6 +49,11 @@ int specular  =   0;  // Specular intensity (%)
 int zh        =  90;  // Light azimuth
 
 float shiny   =   1;  // Shininess (value)
+
+int earth = DAY; //Day or Night
+int at0=100;      //  Constant  attenuation %
+int at1=20;        //  Linear    attenuation %
+int at2=20;        //  Quadratic attenuation %
 
 //First person camera location
 double fpX = 0;
@@ -521,6 +530,46 @@ static void pyramid (double x,double y,double z,
 }
 
 
+void setLighting(){
+     if(earth == DAY){
+        Ambient[0] = 0.8;           Ambient[1] = 0.8;          Ambient[2] = 0.8;
+        Diffuse[0] = 1;          Diffuse[1] = 1;          Diffuse[2] = 1;
+        //Disable Lighting
+        glDisable(GL_LIGHT1);     
+        glDisable(GL_LIGHT2);     
+        glDisable(GL_LIGHT3);     
+        glDisable(GL_LIGHT4);     
+        glDisable(GL_LIGHT5);     
+        glDisable(GL_LIGHT6);     
+     }     
+     else{
+		//Setting For Night
+		Ambient[0] = (20 / 255) * 0.8;          Ambient[1] = (60 / 255) * 0.8;          Ambient[2] = (180 / 255) * 0.8;
+		Diffuse[0] = 0;          				Diffuse[1] = 0;          				Diffuse[2] = 0;
+		
+		glEnable(GL_LIGHT1);
+		
+			float amb[4] = {0,0,0,0};
+			float dif[4] = {1,1,1,1}; //White
+			float spec[4] = {0,0,0,1};
+			
+			//White Light
+			glLightfv(GL_LIGHT1,GL_AMBIENT ,amb);              
+			glLightfv(GL_LIGHT1,GL_DIFFUSE ,dif);
+			glLightfv(GL_LIGHT1,GL_SPECULAR,spec);              
+			
+			
+			float ligthStand1[4] = {-8,9,7.5, 1.0};
+			
+			glLightfv(GL_LIGHT1,GL_POSITION,ligthStand1);
+			
+			glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
+			glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
+			glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
+
+	}
+}
+
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
@@ -645,11 +694,28 @@ void display()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		
 		pyramid(-8,Y_CENTER+2.5,7.5,3,3,3,0);
+		cube(-8,6,7.5,0.2,0.2,0.2, 0);
 		
 		pyramid(15,Y_CENTER+1.5,15,2,2,2,0);
 		pyramid(11,Y_CENTER+1,18,1,1,1,0);
     glDisable(GL_TEXTURE_2D);  
    
+    		
+//============================================================================================day
+   
+   //Light
+   float redEm[4] = {1,1,1,1};
+   glMaterialf(GL_FRONT,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT,GL_SPECULAR,redEm);
+   glMaterialfv(GL_FRONT,GL_EMISSION,redEm);
+   glColor3f(0.5, 0, 0);
+   
+//   cube(21,6,20, 1,0.2,1, 0);
+//   cube(21-ROAD_WIDTH,6,20-ROAD_WIDTH, 1,0.2,1, 0);
+   
+//============================================================================================end of day
+    
+   setLighting();   
    
    glutSwapBuffers();
 }
@@ -736,6 +802,11 @@ void key(unsigned char ch,int x,int y)
    //  Switch projection mode
    else if (ch == 'p' || ch == 'P')
       mode = 1-mode;
+      
+   // Switch Day   
+   else if (ch == 'c' || ch == 'C')
+      earth = 1-earth;
+      
    // Controll Red car
    else if(ch == 'w' || ch == 'W') {      
        if(!start)   
