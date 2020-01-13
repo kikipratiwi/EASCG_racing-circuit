@@ -462,25 +462,6 @@ static void pillar(double x,double y,double z,
    glMaterialf(GL_FRONT,GL_SHININESS,0);
    glMaterialfv(GL_FRONT,GL_SPECULAR,em);
    glMaterialfv(GL_FRONT,GL_EMISSION,em);
- //  glColor3f(0.8, 0.8, 0.1);
-   glBindTexture(GL_TEXTURE_2D,_textureGlass);   
-   glBegin(GL_QUADS);
-   i = 45;
-   for(i = 45; i <= 360; i += 45) {
-      //Lower
-      glNormal3f(Cos(i-22.5),0,Sin(i-22.5));
-      glTexCoord2f(Cos(i), 0); glVertex3f(radScale*Cos(i), 1, radScale*Sin(i));
-      glTexCoord2f(Cos(i), 0); glVertex3f(radScale*Cos(i-45), 1, radScale*Sin(i-45));
-      glTexCoord2f(Cos(i), 1); glVertex3f(outerRadScale*Cos(i-45), 1.1, outerRadScale*Sin(i-45));
-      glTexCoord2f(Cos(i), 1); glVertex3f(outerRadScale*Cos(i), 1.1, outerRadScale*Sin(i));
-      //Upper
-      glNormal3f(Cos(i-22.5),0,Sin(i-22.5));
-      glTexCoord2f(Cos(i), 0); glVertex3f(outerRadScale*Cos(i), 1.1, outerRadScale*Sin(i));
-      glTexCoord2f(Cos(i), 0); glVertex3f(outerRadScale*Cos(i-45), 1.1, outerRadScale*Sin(i-45));
-      glTexCoord2f(Cos(i), 1); glVertex3f(radScale*Cos(i-45), 1.15, radScale*Sin(i-45));
-      glTexCoord2f(Cos(i), 1); glVertex3f(radScale*Cos(i), 1.15, radScale*Sin(i));
-   }
-   glEnd();
 
    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
@@ -589,8 +570,26 @@ void display()
 		road(0,0,-4);
 	
     glDisable(GL_TEXTURE_2D);
-    
-   pillar(-8,Y_CENTER+0.2,0,10,10,10,0);
+
+   float i, gap=2.1, nPillar=6.0;
+   for(i=0; i<(gap*nPillar); i=i+gap) {
+		pillar(-13.5,-1,3+i,15,8,15,0);
+   }
+//    glEnable(GL_TEXTURE_2D);
+//	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+//	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	    
+//   		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
+//   		cube(-13.5,3.3,6.5,0.5,0.3,1.,0);
+//   		cube(-13.5,3.3,9,0.5,0.3,1.25,0);
+//   		
+//    glDisable(GL_TEXTURE_2D);
+   
+   nPillar=9.0;
+   for(i=0; i<(gap*nPillar); i=i+gap) {
+		pillar(-18.5,-1,0.5+i,15,8,15,0);
+   }
    
    glutSwapBuffers();
 }
