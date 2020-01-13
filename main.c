@@ -99,7 +99,7 @@ GLuint	_textureBrick, _textureFence, _textureStone, _textureConcrete,
 		_textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
 		_textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow;   
 		
-GLuint	_textureSand, _textureYellowBrick;
+GLuint	_textureSand, _textureYellowBrick, _textureStartLine;
 
 int refreshMills = 15;
 unsigned int ID;
@@ -136,6 +136,21 @@ void initTexture() {
 	
 	_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
 	_textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
+	_textureStartLine = LoadTexBMP("texture/start-line.bmp");
+	
+	_textureGarageDoor = LoadTexBMP("texture/garage-door.bmp");
+	_textureSidewalk = LoadTexBMP("texture/sidewalk.bmp");	
+	_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
+	_textureGlass = LoadTexBMP("texture/glass.bmp");
+    _textureWheel = LoadTexBMP("texture/car-wheel.bmp");
+    _textureTire = LoadTexBMP("texture/tire-tread.bmp");
+	_textureCarGrill = LoadTexBMP("texture/car-grill.bmp");
+	_textureHeadLamp = LoadTexBMP("texture/headlamp.bmp");
+	_textureGlass = LoadTexBMP("texture/glass.bmp");
+	_textureCarbonFiber = LoadTexBMP("texture/carbon-fiber.bmp");
+	_textureGreyBrick = LoadTexBMP("texture/grey-brick.bmp");
+	_textureWoodBeam = LoadTexBMP("texture/wood-beam.bmp");
+	_textureMetalRoof = LoadTexBMP("texture/metal-roof.bmp");
 	
 }
 
@@ -494,6 +509,11 @@ static void pyramid (double x,double y,double z,
    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
    
+      // Enable color material mode:
+   // The ambient and diffuse color of the front faces will track the color set by glColor().
+   glEnable(GL_COLOR_MATERIAL); 
+   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+   
    glColor3f(0.7, 0.7, 0.7);
 
 
@@ -536,11 +556,11 @@ void setLighting(){
         Diffuse[0] = 1;          Diffuse[1] = 1;          Diffuse[2] = 1;
         //Disable Lighting
         glDisable(GL_LIGHT1);     
-        glDisable(GL_LIGHT2);     
-        glDisable(GL_LIGHT3);     
-        glDisable(GL_LIGHT4);     
-        glDisable(GL_LIGHT5);     
-        glDisable(GL_LIGHT6);     
+//        glDisable(GL_LIGHT2);     
+//        glDisable(GL_LIGHT3);     
+//        glDisable(GL_LIGHT4);     
+//        glDisable(GL_LIGHT5);     
+//        glDisable(GL_LIGHT6);     
      }     
      else{
 		//Setting For Night
@@ -551,7 +571,7 @@ void setLighting(){
 		
 			float amb[4] = {0,0,0,0};
 			float dif[4] = {1,1,1,1}; //White
-			float spec[4] = {0,0,0,1};
+			float spec[4] = {1,1,1,1};
 			
 			//White Light
 			glLightfv(GL_LIGHT1,GL_AMBIENT ,amb);              
@@ -559,16 +579,575 @@ void setLighting(){
 			glLightfv(GL_LIGHT1,GL_SPECULAR,spec);              
 			
 			
-			float ligthStand1[4] = {-8,9,7.5, 1.0};
+			float ligthStand1[4] = {-8,8,7.5, 1.0};
+			float direction[3] = {0.0,-1.0,0.0};
 			
 			glLightfv(GL_LIGHT1,GL_POSITION,ligthStand1);
+			glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,40);
+			glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,direction);
 			
-			glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
-			glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
-			glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
+			//glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
+			//glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
+			//glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
 
 	}
 }
+
+
+//Car Start
+/*
+ *  Draw a section of the car body
+ *     at (x,y,z)
+ *     dimensions (dx,dy,dz)
+ *     rotated th about the y axis
+ *     w (1 to color windows for car body, 0 otherwise)
+ */
+static void body(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 int w)
+{
+ //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+   texScale = 0.1;
+
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   //Texture repitition values
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+
+   //  Cube
+   glBegin(GL_QUADS);
+
+   //  Top
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glNormal3f( 0,+1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+   //  Bottom
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glNormal3f( 0,-one, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
+
+   //  Front
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f( 0, 0, 1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
+   //  Back
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f( 0, 0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
+   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
+
+   //  End
+   glEnd();
+
+   glDisable(GL_POLYGON_OFFSET_FILL);
+   //Color and texture to add windows
+   if(w == 1) {
+      glColor3f(0.8, 0.8, 1);
+      glBindTexture(GL_TEXTURE_2D,_textureGlass);
+      texRepX = 1.0;
+      texRepY = 1.0;
+      glBegin(GL_QUADS);
+      //  Front
+      glNormal3f(0, 0, 1);
+      glTexCoord2f(0.0,0.0); glVertex3f(-0.8,-1, 1);
+      glTexCoord2f(texRepX,0.0); glVertex3f(+0.8,-1, 1);
+      glTexCoord2f(texRepX,texRepY); glVertex3f(+0.8,+1, 1);
+      glTexCoord2f(0.0,texRepY); glVertex3f(-0.8,+1, 1);
+      //  Back
+      glNormal3f(0, 0,-1);
+      glTexCoord2f(0.0,0.0); glVertex3f(+0.8,-1,-1);
+      glTexCoord2f(texRepX,0.0); glVertex3f(-0.8,-1,-1);
+      glTexCoord2f(texRepX,texRepY); glVertex3f(-0.8,+1,-1);
+      glTexCoord2f(0.0,texRepY); glVertex3f(+0.8,+1,-1);
+      glEnd();
+   }
+   glEnable(GL_POLYGON_OFFSET_FILL);
+   
+   //  Undo transformations
+   glPopMatrix();
+}
+
+static void wheel(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 int d,
+                 int s)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   //Turn off shininess for the rubber tire
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   glBindTexture(GL_TEXTURE_2D,_textureWheel);
+   
+   glColor3f(0.8,0.8,0.8);
+   //Tire
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(0, 0, -1);
+   glTexCoord2f(0.5,0.5);
+   glVertex3f(0, 0, -0.05);
+   for (th=0;th<=360;th+=s)
+   {
+      double ph = d-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(Sin(th)*Cos(ph), Cos(th)*Cos(ph), -0.05);
+   }
+   glEnd();
+
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(0, 0, 1);
+   glTexCoord2f(0.5,0.5);
+   glVertex3f(0, 0, 0.05);
+   for (th=360;th>=0;th-=s)
+   {
+      double ph = d-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(Sin(th)*Cos(ph) , Cos(th)*Cos(ph), 0.05);
+   }
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D, _textureTire);
+  
+   glColor3f(0.5,0.5,0.55);
+   glBegin(GL_QUAD_STRIP);
+
+   for (th=0;th<=360;th+=s)
+   {
+      double ph = d-90;
+      glNormal3f(Sin(th)*Cos(ph), Cos(th)*Cos(ph), 0);
+      glTexCoord2f(0,0.1*th); glVertex3d(Sin(th)*Cos(ph), Cos(th)*Cos(ph), -0.05);
+      glTexCoord2f(1,0.1*th); glVertex3d(Sin(th)*Cos(ph), Cos(th)*Cos(ph), 0.05);
+   }
+   // glNormal3f(Sin(0)*Cos(-90), Cos(0)*Cos(-90), 0);
+   // glVertex3d(Sin(0)*Cos(-90), Cos(0)*Cos(-90), -0.05);
+   // glVertex3d(Sin(0)*Cos(-90), Cos(0)*Cos(-90), 0.05);
+   glEnd();
+
+   //  Undo transformations
+   glPopMatrix();
+}
+
+static void bumper(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 int m)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+
+   //Texture repitition values
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+   texScale = 0.1;
+
+   //Offset the bumper so that the lights and grill are drawn directly on the surface
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   //Bumper
+
+   //Base
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glBegin(GL_POLYGON);
+   glNormal3f(0, -1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0,0,0.4);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0,0,-0.4);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.1,0,-0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.1,0,0.35);
+   glEnd();
+
+   //Front Panels
+   glBegin(GL_QUADS);
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.447214, 0, 0.894427);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0, 0.2, 0.4);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0, 0, 0.4);
+
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(1, 0, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0, -0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.1, 0.2, -0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.1, 0, 0.35);
+
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.447214, 0, -0.894427);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0, -0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0, 0, -0.4);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0, 0.2, -0.4);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.1, 0.2, -0.35);
+   
+   glEnd();
+
+   //Upper Bumper
+   glBegin(GL_QUADS);
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.447214, 0.894427, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0, 0.25, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.1, 0.2, -0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0, 0.25, -0.35);
+   glEnd();
+
+   glBegin(GL_TRIANGLES);
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.333333, 0.666667, 0.666667);
+   glTexCoord2f(0.0, 0.0); glVertex3f(0, 0.2, 0.4);
+   glTexCoord2f(texRepX/2, texRepY); glVertex3f(0.1, 0.2, 0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0, 0.25, 0.35);
+
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glNormal3f(0.333333, 0.666667, -0.666667);
+   glTexCoord2f(0.0, 0.0); glVertex3f(0, 0.25, -0.35);
+   glTexCoord2f(texRepX/2, texRepY); glVertex3f(0.1, 0.2, -0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0, 0.2, -0.4);
+   glEnd();
+
+   //  Disable polygon offset
+   glDisable(GL_POLYGON_OFFSET_FILL);
+
+   if (m == 1) {
+      glColor3f(0.2,0.2,0.2);
+      glBindTexture(GL_TEXTURE_2D,_textureCarGrill);
+
+      //Grill
+      glBegin(GL_QUADS);
+      glNormal3f(1, 0, 0);
+      glTexCoord2f(0.0,0.0); glVertex3f(0.1, 0.15, 0.18);
+      glTexCoord2f(0.5,0.0); glVertex3f(0.1, 0.03, 0.18);
+      glTexCoord2f(0.5,1.0); glVertex3f(0.1, 0.03, -0.18);
+      glTexCoord2f(0.0,1.0); glVertex3f(0.1, 0.15, -0.18);
+      glEnd();
+   }
+   
+   //Lights (taillights or headlights)
+   float emColor[4];
+   if(m == 1) {
+      emColor[0] = 1.0 * emission;
+      emColor[1] = 1.0 * emission;
+      emColor[2] = 0.8 * emission;
+      emColor[3] = 1.0 * emission;
+      glColor3f(1, 1, 0.8);
+   } else {
+      emColor[0] = 0.8 * emission;
+      emColor[1] = 0.0 * emission;
+      emColor[2] = 0.0 * emission;
+      emColor[3] = 1.0 * emission;
+      glColor3f(.8, 0, 0);
+   }
+
+   glMaterialf(GL_FRONT,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT,GL_SPECULAR,emColor);
+   glMaterialfv(GL_FRONT,GL_EMISSION,emColor);
+
+   glBindTexture(GL_TEXTURE_2D,_textureHeadLamp);
+
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(1, 0, 0);
+   glTexCoord2f(0.5,0.5); glVertex3f(0.1, 0.13, -0.25);
+   for (th=0;th<=360;th+=10)
+   {
+      double ph = 3-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(0.1, 0.13+(Cos(th)*Cos(ph)), -0.25+(Sin(th)*Cos(ph)));
+   }
+   glEnd();
+
+   glBegin(GL_TRIANGLE_FAN);
+   glNormal3f(1, 0, 0);
+   glTexCoord2f(0.5,0.5); glVertex3f(0.1, 0.13, 0.25);
+   for (th=0;th<=360;th+=10)
+   {
+      double ph = 3-90;
+      glTexCoord2f(0.5*Cos(th)+0.5,0.5*Sin(th)+0.5);
+      glVertex3d(0.1, 0.13+(Cos(th)*Cos(ph)), 0.25+(Sin(th)*Cos(ph)));
+   }
+   glEnd();
+
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   //Undo transformations
+   glPopMatrix();  
+}
+
+static void car(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th,
+                 float cr, float cb, float cg)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   
+   //  Save transformation
+   glPushMatrix();
+   //  Offset
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+   
+   glPolygonOffset(1,1);
+
+   wheel(0.6,0,0.4, 1,1,1, 0, 8, 10);
+   wheel(-0.6,0,-0.4, 1,1,1, 0, 8, 10);
+   wheel(0.6,0,-0.4, 1,1,1, 0, 8, 10);
+   wheel(-0.6,0,0.4, 1,1,1, 0, 8, 10);
+
+   glColor3f(cr, cb, cg);
+
+   //Lower Body
+   body(0,0.1,0, 0.8,0.1,0.4, 0, 0);
+   //Cabin
+   body(-0.1,0.3,0, 0.3,0.1,0.35, 0, 1);
+  
+   texScale = 1.0;
+
+   glColor3f(cr, cb, cg);
+
+   //Front Bumper
+   bumper(0.8,0,0, 1,1,1, 0, 1);
+
+   glColor3f(cr, cb, cg);
+
+   //Rear Bumper
+   bumper(-0.8,0,0, 1,1,1, 180, 0);
+   
+   //  Set specular color to white
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+   
+   glEnable(GL_POLYGON_OFFSET_FILL);
+
+   glColor3f(cr, cb, cg);
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+
+   //Texture repitition values
+   float texRepX = 1.0;
+   float texRepY = 1.0;
+
+   //Hood and upper side pannels
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glBegin(GL_QUADS);
+   glNormal3f(0, 0.707107, 0.707107);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8, 0.25, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8, 0.2, 0.4);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.8, 0.2, 0.4);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.8, 0.25, 0.35);
+
+   glNormal3f(0, 1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.4, 0.25, 0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.8, 0.25, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.8, 0.25, -0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.4, 0.25, -0.35);
+   
+   glNormal3f(0, 0.707107, -0.707107);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8, 0.2, -0.4);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8, 0.25, -0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.8, 0.25, -0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.8, 0.2, -0.4);
+   glEnd();
+
+   //Trunk
+   texRepX = dx/texScale;
+   texRepY = dz/texScale;
+   glBegin(GL_QUADS);
+   glNormal3f(0,1,0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8, 0.25, -0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8, 0.25, 0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.6, 0.25, 0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.6, 0.25, -0.35);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureGlass);
+
+   glColor3f(0.8, 0.8, 1);
+
+   //Windshield
+   texRepX = 1.0;
+   texRepY = 1.0;
+   glBegin(GL_QUADS);
+   glNormal3f(0.6, 0.8, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.4,0.25,0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(0.4,0.25,-0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(0.2,0.4,-0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(0.2,0.4,0.35);
+   glEnd();
+
+   glBegin(GL_TRIANGLES);
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.2,0.4,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0.2,0.25,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(0.4,0.25,0.35);
+
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(0.4,0.25,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(0.2,0.25,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(0.2,0.4,-0.35);
+   glEnd();
+
+   //Rear Window
+   texRepX = 1.0;
+   texRepY = 1.0;
+   glBegin(GL_QUADS);
+   glNormal3f(-0.6, 0.8, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.6,0.25,-0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.6,0.25,0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.4,0.4,0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.4,0.4,-0.35);
+   glEnd();
+
+   glBegin(GL_TRIANGLES);
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.6,0.25,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.4,0.25,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.4,0.4,0.35);
+   
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.4,0.4,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.4,0.25,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.6,0.25,-0.35);
+   glEnd();
+
+
+   glBindTexture(GL_TEXTURE_2D,_textureCarbonFiber);
+
+   //Spoiler
+   glColor3f(0.3,0.3,0.3);
+   cube(-0.75,0.28,0.3, 0.02,0.03,0.02, 0);
+   cube(-0.75,0.28,-0.3, 0.02,0.03,0.02, 0);
+
+   texRepX = 5.0;
+   texRepY = 1.0;
+
+   glBegin(GL_QUADS);
+   glNormal3f(0, -1, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.7,0.31,-0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.7,0.31,0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.8,0.31,0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.8,0.31,-0.35);
+   
+   glNormal3f(0.196116, 0.980581, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8,0.33,-0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8,0.33,0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.7,0.31,0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.7,0.31,-0.35);
+
+   texRepX = 5.0;
+   texRepY = 0.2;
+   glNormal3f(-1, 0, 0);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.8,0.33,0.35);
+   glTexCoord2f(texRepX,0.0); glVertex3f(-0.8,0.33,-0.35);
+   glTexCoord2f(texRepX,texRepY); glVertex3f(-0.8,0.31,-0.35);
+   glTexCoord2f(0.0,texRepY); glVertex3f(-0.8,0.31,0.35);
+   
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);
+   glColor3f(cr, cb, cg);
+
+   //Spoiler Fins
+   texRepX = dx/texScale;
+   texRepY = dy/texScale;
+   glBegin(GL_TRIANGLES);
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.68,0.31,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.82,0.35,-0.35);
+
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.82,0.35,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.68,0.31,0.35);
+   
+   //Duplicate to draw both sides (with inverted normals) when face culling is on
+   glNormal3f(0,0,1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.68,0.31,-0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,-0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.82,0.35,-0.35);
+
+   glNormal3f(0,0,-1);
+   glTexCoord2f(0.0,0.0); glVertex3f(-0.82,0.35,0.35);
+   glTexCoord2f(texRepX, 0.0); glVertex3f(-0.82,0.31,0.35);
+   glTexCoord2f(texRepX, texRepY); glVertex3f(-0.68,0.31,0.35);
+   
+   glEnd();
+   
+   //Undo transformations
+   glPopMatrix();
+} //Car End
+
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -694,7 +1273,7 @@ void display()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		
 		pyramid(-8,Y_CENTER+2.5,7.5,3,3,3,0);
-		cube(-8,6,7.5,0.2,0.2,0.2, 0);
+//		cube(-8,6,7.5,0.2,0.2,0.2, 0);
 		
 		pyramid(15,Y_CENTER+1.5,15,2,2,2,0);
 		pyramid(11,Y_CENTER+1,18,1,1,1,0);
@@ -715,7 +1294,23 @@ void display()
    
 //============================================================================================end of day
     
-   setLighting();   
+      
+   
+    /* Controlled Car */
+    glPushMatrix();
+    	glTranslated(-11,1.1,13);
+		car(-1+carXIncrement, -1 ,2+carZIncrement, 1,1,1, carRotate, 1,0,0);
+    glPopMatrix();
+    
+	glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   		
+		   quads(0,0,0,1,Y_CENTER+0.3,3,0);
+    glDisable(GL_TEXTURE_2D);  
+    
+    setLighting();
    
    glutSwapBuffers();
 }
