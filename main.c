@@ -52,8 +52,8 @@ float shiny   =   1;  // Shininess (value)
 
 int earth = DAY; //Day or Night
 int at0=100;      //  Constant  attenuation %
-int at1=20;        //  Linear    attenuation %
-int at2=20;        //  Quadratic attenuation %
+int at1=30;        //  Linear    attenuation %
+int at2=30;        //  Quadratic attenuation %
 
 //First person camera location
 double fpX = 0;
