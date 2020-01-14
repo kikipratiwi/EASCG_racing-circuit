@@ -1215,7 +1215,8 @@ void display()
       printf("%f\n", refY);
    
       glRotated(-carRotate,0,1,0);      
-         gluLookAt(-1+carXIncrement, 0.9 ,-2.7+carZIncrement , 8.210370+carXIncrement,refY,-3.058857+carZIncrement, 0,1,0);  
+//    	glTranslated(-11,1.1,13);
+         gluLookAt(-13+carXIncrement, 1.2 ,15+carZIncrement , 12.210370+carXIncrement,refY,15.058857+carZIncrement, 0,1,0);  
    }
 
    //  Draw scene =========================================================================================================
@@ -1302,22 +1303,28 @@ void display()
 //============================================================================================end of day
     /* Opponent's Car*/
     glPushMatrix();
-    	glTranslated(-13,1.1,15);                               
+    	glTranslated(-13,1.2,15);                               
 		car(-1+centerXIncrement, -1 ,2+centerZIncrement, 1,1,1, carRotate2, 0,0,0);
     glPopMatrix();
     
     /* Controlled Car */
     glPushMatrix();
-    	glTranslated(-11,1.1,13);
-		car(-1+carXIncrement, -1 ,2+carZIncrement, 1,1,1, carRotate, 1,0,0);
+    	glTranslated(0,1.2,0);
+		car(-12+carXIncrement, -1 ,15+carZIncrement, 1,1,1, carRotate, 1,0,0);
     glPopMatrix();
     
+    /* Start Line */
 	glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+        glBindTexture(GL_TEXTURE_2D, _textureStartLine);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
    		
-		   quads(-10,0,16,0.5,Y_CENTER+0.3,2,0);
+   		   glColor3f(0.7, 0.7, 0.7);
+   		   
+   		   glPushMatrix();
+   		   		glScaled(5,5,5);
+		   		quads(-10,Y_CENTER+0.3,16,0.1,0.1,0.1,0);
+		   glPopMatrix();
     glDisable(GL_TEXTURE_2D);  
     
     setLighting();
