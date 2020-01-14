@@ -52,8 +52,8 @@ float shiny   =   1;  // Shininess (value)
 
 int earth = DAY; //Day or Night
 int at0=100;      //  Constant  attenuation %
-int at1=20;        //  Linear    attenuation %
-int at2=20;        //  Quadratic attenuation %
+int at1=30;        //  Linear    attenuation %
+int at2=30;        //  Quadratic attenuation %
 
 //First person camera location
 double fpX = 0;
@@ -625,6 +625,7 @@ void setLighting(){
 		Diffuse[0] = 0;          				Diffuse[1] = 0;          				Diffuse[2] = 0;
 		
 		glEnable(GL_LIGHT1);
+		glEnable(GL_LIGHT2);
 		
 			float amb[4] = {0,0,0,0};
 			float dif[4] = {1,1,1,1}; //White
@@ -635,7 +636,7 @@ void setLighting(){
 			glLightfv(GL_LIGHT1,GL_DIFFUSE ,dif);
 			glLightfv(GL_LIGHT1,GL_SPECULAR,spec);              
 			
-			
+			//First
 			float ligthStand1[4] = {-15,3,10, 1.0};
 			float direction[3] = {0.0,-1.0,0.0};
 			
@@ -646,6 +647,19 @@ void setLighting(){
 			glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
 			glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
 			glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
+			
+			//Second
+			float ligthStand2[4] = {8,3,2, 1.0};
+						//White Light
+			glLightfv(GL_LIGHT2,GL_AMBIENT ,amb);              
+			glLightfv(GL_LIGHT2,GL_DIFFUSE ,dif);
+			glLightfv(GL_LIGHT2,GL_SPECULAR,spec);              
+          			
+			glLightfv(GL_LIGHT2,GL_POSITION,ligthStand2);
+			
+			glLightf(GL_LIGHT2,GL_CONSTANT_ATTENUATION ,at0/100.0);              
+			glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION   ,at1/100.0);
+			glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION,at2/100.0);
 
 	}
 }
@@ -1438,6 +1452,41 @@ void carEnemy(){
 
 }
 
+void drawPillar(){
+     //Pillar
+   float i, gap=2.1, nPillar=6.0;
+   for(i=0; i<(gap*nPillar); i=i+gap) {
+		pillar(-13.5,-1,3+i,15,8,15,0);
+   }
+   
+   nPillar=9.0;
+   for(i=0; i<(gap*nPillar); i=i+gap) {
+		pillar(-18.5,-1,0.5+i,15,8,15,0);
+   }
+   
+    glEnable(GL_TEXTURE_2D);
+	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    
+   		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
+   		cube(-13.5,3.3,6.1,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,8.2,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,10.3,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,12.6,0.5,0.3,1.25,0);
+   		
+   		cube(-18.5,3.3,1.3,0.5,0.3,1.25,0);
+   		cube(-18.5,3.3,3.6,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,5.7,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,7.8,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,9.9,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,12.0,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,14.1,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,16.4,0.5,0.3,1.25,0);
+   		
+    glDisable(GL_TEXTURE_2D);     
+}
+
 void timer(int miliseconds) {
      
    	if(start)
@@ -1583,38 +1632,16 @@ void display()
     // ======================================================================================center dessert	
 	centerDessert();
     
+    //Pillar
+    drawPillar();
+    
+    //Second Pillar
+    glPushMatrix();
+        glRotated(135, 0,1,0);
+        glTranslated(9.2 ,0,-3);
+        drawPillar();
+    glPopMatrix();
 
-   float i, gap=2.1, nPillar=6.0;
-   for(i=0; i<(gap*nPillar); i=i+gap) {
-		pillar(-13.5,-1,3+i,15,8,15,0);
-   }
-   
-   nPillar=9.0;
-   for(i=0; i<(gap*nPillar); i=i+gap) {
-		pillar(-18.5,-1,0.5+i,15,8,15,0);
-   }
-   
-    glEnable(GL_TEXTURE_2D);
-	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	    
-   		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
-   		cube(-13.5,3.3,6.1,0.5,0.3,1.,0);
-   		cube(-13.5,3.3,8.2,0.5,0.3,1.,0);
-   		cube(-13.5,3.3,10.3,0.5,0.3,1.,0);
-   		cube(-13.5,3.3,12.6,0.5,0.3,1.25,0);
-   		
-   		cube(-18.5,3.3,1.3,0.5,0.3,1.25,0);
-   		cube(-18.5,3.3,3.6,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,5.7,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,7.8,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,9.9,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,12.0,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,14.1,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,16.4,0.5,0.3,1.25,0);
-   		
-    glDisable(GL_TEXTURE_2D);
    
     //======================================================================================Pyramid
 	glEnable(GL_TEXTURE_2D);
