@@ -65,12 +65,19 @@ double refX = 0;
 double refY = 0;
 double refZ = 0;
 
-//Person Control
+//User car
 float carRotateX = 0.5;
 float carRotateZ = 0;
 float carXIncrement = 0;
 float carZIncrement = 0;
 float carRotate = 0;
+
+//Enemy car
+float centerXIncrement = 0;
+float centerZIncrement = 0;
+float xRotate = 0.5;
+float zRotate = 0;
+float carRotate2 = 0;
 
 float temp;
 
@@ -151,7 +158,6 @@ void initTexture() {
 	_textureGreyBrick = LoadTexBMP("texture/grey-brick.bmp");
 	_textureWoodBeam = LoadTexBMP("texture/wood-beam.bmp");
 	_textureMetalRoof = LoadTexBMP("texture/metal-roof.bmp");
-	
 }
 
 
@@ -602,12 +608,13 @@ void setLighting(){
  *     rotated th about the y axis
  *     w (1 to color windows for car body, 0 otherwise)
  */
+
 static void body(double x,double y,double z,
                  double dx,double dy,double dz,
                  double th,
                  int w)
 {
- //  Set specular color to white
+   //  Set specular color to white
    float white[] = {1,1,1,1};
    float black[] = {0,0,0,1};
    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
@@ -711,7 +718,7 @@ static void wheel(double x,double y,double z,
    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0);
    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
-   
+
    //  Save transformation
    glPushMatrix();
    //  Offset
@@ -720,7 +727,7 @@ static void wheel(double x,double y,double z,
    glScaled(dx,dy,dz);
 
    glBindTexture(GL_TEXTURE_2D,_textureWheel);
-   
+
    glColor3f(0.8,0.8,0.8);
    //Tire
    glBegin(GL_TRIANGLE_FAN);
@@ -748,10 +755,10 @@ static void wheel(double x,double y,double z,
    glEnd();
 
    glBindTexture(GL_TEXTURE_2D, _textureTire);
-  
+
    glColor3f(0.5,0.5,0.55);
    glBegin(GL_QUAD_STRIP);
-
+   
    for (th=0;th<=360;th+=s)
    {
       double ph = d-90;
@@ -779,7 +786,7 @@ static void bumper(double x,double y,double z,
    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
-   
+
    //  Save transformation
    glPushMatrix();
    //  Offset
@@ -881,7 +888,7 @@ static void bumper(double x,double y,double z,
       glTexCoord2f(0.0,1.0); glVertex3f(0.1, 0.15, -0.18);
       glEnd();
    }
-   
+
    //Lights (taillights or headlights)
    float emColor[4];
    if(m == 1) {
@@ -947,14 +954,15 @@ static void car(double x,double y,double z,
    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
-   
+
+   glEnable(GL_TEXTURE_2D);
    //  Save transformation
    glPushMatrix();
    //  Offset
    glTranslated(x,y,z);
    glRotated(th,0,1,0);
    glScaled(dx,dy,dz);
-   
+
    glPolygonOffset(1,1);
 
    wheel(0.6,0,0.4, 1,1,1, 0, 8, 10);
@@ -968,7 +976,7 @@ static void car(double x,double y,double z,
    body(0,0.1,0, 0.8,0.1,0.4, 0, 0);
    //Cabin
    body(-0.1,0.3,0, 0.3,0.1,0.35, 0, 1);
-  
+
    texScale = 1.0;
 
    glColor3f(cr, cb, cg);
@@ -980,7 +988,7 @@ static void car(double x,double y,double z,
 
    //Rear Bumper
    bumper(-0.8,0,0, 1,1,1, 180, 0);
-   
+
    //  Set specular color to white
    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
@@ -1080,6 +1088,9 @@ static void car(double x,double y,double z,
    glTexCoord2f(texRepX, texRepY); glVertex3f(-0.6,0.25,-0.35);
    glEnd();
 
+   //glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   //glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   //glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
 
    glBindTexture(GL_TEXTURE_2D,_textureCarbonFiber);
 
@@ -1143,11 +1154,10 @@ static void car(double x,double y,double z,
    glTexCoord2f(texRepX, texRepY); glVertex3f(-0.68,0.31,0.35);
    
    glEnd();
-   
+
    //Undo transformations
    glPopMatrix();
-} //Car End
-
+}
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -1250,21 +1260,21 @@ void display()
    for(i=0; i<(gap*nPillar); i=i+gap) {
 		pillar(-13.5,-1,3+i,15,8,15,0);
    }
-//    glEnable(GL_TEXTURE_2D);
-//	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
-//	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//	    
-//   		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
-//   		cube(-13.5,3.3,6.5,0.5,0.3,1.,0);
-//   		cube(-13.5,3.3,9,0.5,0.3,1.25,0);
-//   		
-//    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
+	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    
+   		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
+   		cube(-13.5,3.3,6.5,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,9,0.5,0.3,1.25,0);
+   		
+    glDisable(GL_TEXTURE_2D);
    
-   nPillar=9.0;
-   for(i=0; i<(gap*nPillar); i=i+gap) {
-		pillar(-18.5,-1,0.5+i,15,8,15,0);
-   }
+//   nPillar=9.0;
+//   for(i=0; i<(gap*nPillar); i=i+gap) {
+//		pillar(-18.5,-1,0.5+i,15,8,15,0);
+//   }
    
     //Pyramid
 	glEnable(GL_TEXTURE_2D);
@@ -1289,13 +1299,13 @@ void display()
    glMaterialfv(GL_FRONT,GL_EMISSION,redEm);
    glColor3f(0.5, 0, 0);
    
-//   cube(21,6,20, 1,0.2,1, 0);
-//   cube(21-ROAD_WIDTH,6,20-ROAD_WIDTH, 1,0.2,1, 0);
-   
 //============================================================================================end of day
+    /* Opponent's Car*/
+    glPushMatrix();
+    	glTranslated(-13,1.1,15);                               
+		car(-1+centerXIncrement, -1 ,2+centerZIncrement, 1,1,1, carRotate2, 0,0,0);
+    glPopMatrix();
     
-      
-   
     /* Controlled Car */
     glPushMatrix();
     	glTranslated(-11,1.1,13);
@@ -1307,7 +1317,7 @@ void display()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
    		
-		   quads(0,0,0,1,Y_CENTER+0.3,3,0);
+		   quads(-10,0,16,0.5,Y_CENTER+0.3,2,0);
     glDisable(GL_TEXTURE_2D);  
     
     setLighting();
