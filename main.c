@@ -636,16 +636,16 @@ void setLighting(){
 			glLightfv(GL_LIGHT1,GL_SPECULAR,spec);              
 			
 			
-			float ligthStand1[4] = {-8,8,7.5, 1.0};
+			float ligthStand1[4] = {-15,3,10, 1.0};
 			float direction[3] = {0.0,-1.0,0.0};
 			
 			glLightfv(GL_LIGHT1,GL_POSITION,ligthStand1);
-			glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,40);
-			glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,direction);
+			//glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,20);
+			//glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,direction);
 			
-			//glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
-			//glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
-			//glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
+			glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
+			glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
+			glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
 
 	}
 }
