@@ -1779,7 +1779,13 @@ void key(unsigned char ch,int x,int y)
       
    // Switch Day   
    else if (ch == 'c' || ch == 'C')
-      earth = 1-earth;
+      earth = 1-earth;  
+	  
+   //  Change field of view angle
+   else if (ch == '-' && ch>1)
+      fov--;
+   else if (ch == '+' && ch<179)
+      fov++;
       
    // Controll Red car
    else if(ch == 'w' || ch == 'W') {      
