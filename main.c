@@ -625,6 +625,7 @@ void setLighting(){
 		Diffuse[0] = 0;          				Diffuse[1] = 0;          				Diffuse[2] = 0;
 		
 		glEnable(GL_LIGHT1);
+		glEnable(GL_LIGHT2);
 		
 			float amb[4] = {0,0,0,0};
 			float dif[4] = {1,1,1,1}; //White
@@ -635,7 +636,7 @@ void setLighting(){
 			glLightfv(GL_LIGHT1,GL_DIFFUSE ,dif);
 			glLightfv(GL_LIGHT1,GL_SPECULAR,spec);              
 			
-			
+			//First
 			float ligthStand1[4] = {-15,3,10, 1.0};
 			float direction[3] = {0.0,-1.0,0.0};
 			
@@ -646,6 +647,19 @@ void setLighting(){
 			glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
 			glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
 			glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
+			
+			//Second
+			float ligthStand2[4] = {8,3,2, 1.0};
+						//White Light
+			glLightfv(GL_LIGHT2,GL_AMBIENT ,amb);              
+			glLightfv(GL_LIGHT2,GL_DIFFUSE ,dif);
+			glLightfv(GL_LIGHT2,GL_SPECULAR,spec);              
+          			
+			glLightfv(GL_LIGHT2,GL_POSITION,ligthStand2);
+			
+			glLightf(GL_LIGHT2,GL_CONSTANT_ATTENUATION ,at0/100.0);              
+			glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION   ,at1/100.0);
+			glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION,at2/100.0);
 
 	}
 }
