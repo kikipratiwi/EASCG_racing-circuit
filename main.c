@@ -2,11 +2,14 @@
  *  EAS Kiki Pratiwi 171511046
  *
  *  p             Toggles first person/perspective projection
+ *  a/s/d/w       Move red car 
+ *  c             Change night or day mode
  *  arrow keys    Change view angle
  *  PgDn/PgUp     Zoom in and out (in perspective view)
  *  ESC           Exit
  *
  */
+
 #include "lib/JTKPOLBAN.h"
 #include "lib/loadtexbmp.c"
 #include "lib/fatal.c"
@@ -31,7 +34,6 @@
 
 int mode	=	0;      //  Projection mode
 float thf   =   105;    //  Azimuth of view angle for first person
-//int th		=	110;    //  Azimuth of view angle
 int th		=	105;    //  Azimuth of view angle
 int ph		=	0;      //  Elevation of view angle
 int fov		=	55;     //  Field of view (for perspective)
@@ -84,8 +86,9 @@ float temp;
 //Race
 int start = 0;
 int step = 0 ;
-    //manipulate speed
-    int carMove = 70;
+
+//manipulate speed
+int carMove = 70;
 
 //Texture Variables
 int tMode = 0;
@@ -125,49 +128,42 @@ void initTexture() {
 	_textureSkyboxRight = LoadTexBMP("texture/skybox-right.bmp");
 	_textureSkyboxLeft = LoadTexBMP("texture/skybox-left.bmp");
 	_textureSkyboxTop = LoadTexBMP("texture/skybox-top.bmp");
+
 	_textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
 
 
-	_textureGrass = LoadTexBMP("texture/grass.bmp");
+	// _textureGrass = LoadTexBMP("texture/grass.bmp");
 	_textureBrick = LoadTexBMP("texture/bricks.bmp");
-	_textureRoof = LoadTexBMP("texture/roof.bmp");
-	_textureDoor = LoadTexBMP("texture/front-door-2.bmp");
-	_textureWindow = LoadTexBMP("texture/window-1.bmp");
-	_textureFence = LoadTexBMP("texture/fence.bmp");
-	_textureStone = LoadTexBMP("texture/stone.bmp");
-	_textureConcrete = LoadTexBMP("texture/concrete.bmp");
-	_textureOrangeConcrete = LoadTexBMP("texture/concrete-orange.bmp");
-	_textureDirt = LoadTexBMP("texture/sidewalk.bmp");
-	_texturePebble = LoadTexBMP("texture/pebble.bmp");
-	_textureCeiling = LoadTexBMP("texture/ceiling.bmp");
-	_textureDiffuse = LoadTexBMP("texture/diffuse.bmp");
+	// _textureRoof = LoadTexBMP("texture/roof.bmp");
+	// _textureDoor = LoadTexBMP("texture/front-door-2.bmp");
+	// _textureWindow = LoadTexBMP("texture/window-1.bmp");
+	// _textureFence = LoadTexBMP("texture/fence.bmp");
+	// _textureStone = LoadTexBMP("texture/stone.bmp");
+	// _textureConcrete = LoadTexBMP("texture/concrete.bmp");
+	// _textureOrangeConcrete = LoadTexBMP("texture/concrete-orange.bmp");
+	// _textureDirt = LoadTexBMP("texture/sidewalk.bmp");
+	// _texturePebble = LoadTexBMP("texture/pebble.bmp");
+	// _textureCeiling = LoadTexBMP("texture/ceiling.bmp");
+	// _textureDiffuse = LoadTexBMP("texture/diffuse.bmp");
 	
 	_textureSand = LoadTexBMP("texture/sand.bmp");   
 	_textureYellowBrick = LoadTexBMP("texture/yellow-brick.bmp");   
 	
-	_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
 	_textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
 	_textureStartLine = LoadTexBMP("texture/start-line.bmp");
 	_textureSand2 = LoadTexBMP("texture/sand-2.bmp");
-	_textureHexagonStone = LoadTexBMP("texture/hexagon-stone.bmp");
 
-	
-	_textureGarageDoor = LoadTexBMP("texture/garage-door.bmp");
-	_textureSidewalk = LoadTexBMP("texture/sidewalk.bmp");	
 	_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
 	_textureGlass = LoadTexBMP("texture/glass.bmp");
     _textureWheel = LoadTexBMP("texture/car-wheel.bmp");
     _textureTire = LoadTexBMP("texture/tire-tread.bmp");
 	_textureCarGrill = LoadTexBMP("texture/car-grill.bmp");
 	_textureHeadLamp = LoadTexBMP("texture/headlamp.bmp");
-	_textureGlass = LoadTexBMP("texture/glass.bmp");
 	_textureCarbonFiber = LoadTexBMP("texture/carbon-fiber.bmp");
 	_textureGreyBrick = LoadTexBMP("texture/grey-brick.bmp");
 	_textureWoodBeam = LoadTexBMP("texture/wood-beam.bmp");
 	_textureMetalRoof = LoadTexBMP("texture/metal-roof.bmp");
 }
-
-
 
 static void cube(double x,double y,double z,
                  double dx,double dy,double dz,
@@ -175,72 +171,70 @@ static void cube(double x,double y,double z,
 {
    //  Save transformation
    glPushMatrix();
-   //  Offset, scale and rotate
-   glTranslated(x,y,z);
-   glRotated(th,0,1,0);
-   glScaled(dx,dy,dz);
+		//  Offset, scale and rotate
+		glTranslated(x,y,z);
+		glRotated(th,0,1,0);
+		glScaled(dx,dy,dz);
 
-   //Texture repitition values
-   float texRepX = 1.0;
-   float texRepY = 1.0;
+		//Texture repitition values
+		float texRepX = 1.0;
+		float texRepY = 1.0;
 
-   //  Cube
-   glBegin(GL_QUADS);
-   //  Front
-   texRepX = dx/texScale;
-   texRepY = dy/texScale;
-   glNormal3f( 0, 0, 1);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
-   //  Back
-   texRepX = dx/texScale;
-   texRepY = dy/texScale;
-   glNormal3f( 0, 0,-1);
-   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
-   //  Right
-   texRepX = dz/texScale;
-   texRepY = dy/texScale;
-   glNormal3f(+1, 0, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,+1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,+1);
-   //  Left
-   texRepX = dz/texScale;
-   texRepY = dy/texScale;
-   glNormal3f(-1, 0, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,+1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,+1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
-   //  Top
-   texRepX = dx/texScale;
-   texRepY = dz/texScale;
-   glNormal3f( 0,+1, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
-   //  Bottom
-   texRepX = dx/texScale;
-   texRepY = dz/texScale;
-   glNormal3f( 0,-one, 0);
-   glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
-   glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
-   glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
-   glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
-   //  End
-   glEnd();
+		//  Cube
+		glBegin(GL_QUADS);
+		//  Front
+		texRepX = dx/texScale;
+		texRepY = dy/texScale;
+		glNormal3f( 0, 0, 1);
+		glTexCoord2f(0.0,0.0); glVertex3f(-1,-1, 1);
+		glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1, 1);
+		glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1, 1);
+		glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1, 1);
+		//  Back
+		texRepX = dx/texScale;
+		texRepY = dy/texScale;
+		glNormal3f( 0, 0,-1);
+		glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,-1);
+		glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,-1);
+		glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,-1);
+		glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,-1);
+		//  Right
+		texRepX = dz/texScale;
+		texRepY = dy/texScale;
+		glNormal3f(+1, 0, 0);
+		glTexCoord2f(0.0,0.0); glVertex3f(+1,-1,+1);
+		glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+		glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+		glTexCoord2f(0.0,texRepY); glVertex3f(+1,+1,+1);
+		//  Left
+		texRepX = dz/texScale;
+		texRepY = dy/texScale;
+		glNormal3f(-1, 0, 0);
+		glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+		glTexCoord2f(texRepX,0.0); glVertex3f(-1,-1,+1);
+		glTexCoord2f(texRepX,texRepY); glVertex3f(-1,+1,+1);
+		glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+		//  Top
+		texRepX = dx/texScale;
+		texRepY = dz/texScale;
+		glNormal3f( 0,+1, 0);
+		glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
+		glTexCoord2f(texRepX,0.0); glVertex3f(+1,+1,+1);
+		glTexCoord2f(texRepX,texRepY); glVertex3f(+1,+1,-1);
+		glTexCoord2f(0.0,texRepY); glVertex3f(-1,+1,-1);
+		//  Bottom
+		texRepX = dx/texScale;
+		texRepY = dz/texScale;
+		glNormal3f( 0,-one, 0);
+		glTexCoord2f(0.0,0.0); glVertex3f(-1,-1,-1);
+		glTexCoord2f(texRepX,0.0); glVertex3f(+1,-1,-1);
+		glTexCoord2f(texRepX,texRepY); glVertex3f(+1,-1,+1);
+		glTexCoord2f(0.0,texRepY); glVertex3f(-1,-1,+1);
+		//  End
+		glEnd();
    //  Undo transofrmations
    glPopMatrix();
 }
-
-
 
 static void skybox(float dim) {       
    glDisable(GL_POLYGON_OFFSET_FILL);
@@ -309,7 +303,6 @@ static void skybox(float dim) {
    glEnd();
 }
 
-
 void dessert(double x, double y, double z, double width){
    float white[] = {1,1,1,1};
    float black[] = {0,0,0,1};
@@ -322,15 +315,6 @@ void dessert(double x, double y, double z, double width){
 	glPushMatrix();
 		cube(x, y, z, width, 0.17, width, 0);
 	glPopMatrix();
-}
-
-static void support(double x, double y, double z)
-{
-   glBindTexture(GL_TEXTURE_2D,_textureSupport );
-   glPushMatrix();
-      glTranslated(x,y,z);
-      cube(0,-0.05,-0.5, 2,0.15,0.2, 0);
-   glPopMatrix();
 }
 
 static void quadsNoRepeateTexture(double x,double z) 
@@ -427,74 +411,6 @@ static void road(double x, double y, double z)
    glPopMatrix();
 }
 
-static void pitstop(double x, double y, double z)
-{
-   float white[] = {1,1,1,1};
-   float black[] = {0,0,0,1};
-   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
-   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
-   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
-           
-   glBindTexture(GL_TEXTURE_2D,_textureYellowBrick);
-   glPushMatrix();
-   //  Offset
-   glTranslated(x,y,z);
-       //Building
-       cube(0,1.6,0, 2,0.4,1, 0); //Top   
-       glBindTexture(GL_TEXTURE_2D,_textureBrownBrick);
-       cube(-1.75,0.65,0, 0.25,0.55,1, 0); //Left
-       cube(1.75,0.65,0, 0.25,0.55,1, 0); //Right
-       cube(0,0.65,0, 0.2,0.55,1, 0); //Middle
-   glPopMatrix();   
-   
-   float texRepX = 1.0;
-   float texRepY = 1.0;   
-   //Door left
-   glBindTexture(GL_TEXTURE_2D,_textureYellowBrick);
-   glPushMatrix();
-      glTranslated(x,y,z);
-       glBegin(GL_QUADS);
-           //Left
-           glTexCoord2f(0.0,0.0); glVertex3f(-1.5, 0.1, 0.9);
-           glTexCoord2f(texRepX,0.0); glVertex3f(-0.2, 0.1, 0.9);
-           glTexCoord2f(texRepX,texRepY); glVertex3f(-0.2, 1.2, 0.9);
-           glTexCoord2f(0.0,texRepY); glVertex3f(-1.5, 1.2, 0.9);
-        glEnd();
-   glPopMatrix();  
-   //Door Right     
-   glPushMatrix();
-      glTranslated(x+1.7,y,z);
-       glBegin(GL_QUADS);         
-           //Left
-           glTexCoord2f(0.0,0.0); glVertex3f(-1.5, 0.1, 0.9);
-           glTexCoord2f(texRepX,0.0); glVertex3f(-0.2, 0.1, 0.9);
-           glTexCoord2f(texRepX,texRepY); glVertex3f(-0.2, 1.2, 0.9);
-           glTexCoord2f(0.0,texRepY); glVertex3f(-1.5, 1.2, 0.9);
-        glEnd();
-   glPopMatrix();
-   //Floor
-   glBindTexture(GL_TEXTURE_2D,_textureSidewalk );
-   glPushMatrix();
-      glTranslated(x,y,z);
-      cube(0,-0.05,0.9, 2,0.15,0.1, 0);
-   glPopMatrix();
-   
-   //Sidewalk
-   glPushMatrix();
-       glTranslated(x,0, 0);
-       cube(0,-0.05,z+1.5, 2,0.15,0.5, 0); // Along Street
-       glTranslated(0,0, 1);
-       cube(0,-0.05,z+1.5, 2,0.15,0.5, 0); // Along Street
-   glPopMatrix();
-   //
-   support(x,y, z+3.7);
-   //Road
-   road(x, y,z+4.91);
-   
-//      road(x, y,z+8);
-}
-
-
 static void pillar(double x,double y,double z,
                      double dx,double dy,double dz,
                      double th)
@@ -520,14 +436,14 @@ static void pillar(double x,double y,double z,
 
    //Pole
    glEnable(GL_TEXTURE_2D);
-	   glColor3f(0.4, 0.4, 0.4);
+	//    glColor3f(0.4, 0.4, 0.4);
 	   glBindTexture(GL_TEXTURE_2D,_textureBasicMetal);   
 	   glBegin(GL_QUADS);
 		   int i;
 		   for(i=45; i <= 360; i += 45) {
 		      
 		      //Pole Lower
-		      glNormal3f(Cos(i-22.5),0,Sin(i-22.5));
+		    //   glNormal3f(Cos(i-22.5),0,Sin(i-22.5));
 		      glTexCoord2f(Cos(i), 0); glVertex3f(radScale*Cos(i), 0.1, radScale*Sin(i));
 		      glTexCoord2f(Cos(i), 0); glVertex3f(radScale*Cos(i-45), 0.1, radScale*Sin(i-45));
 		      glTexCoord2f(Cos(i), 2); glVertex3f(radScale*Cos(i-45), 0.5, radScale*Sin(i-45));
@@ -609,15 +525,11 @@ static void pyramid (double x,double y,double z,
 
 void setLighting(){
      if(earth == DAY){
-        Ambient[0] = 0.8;           Ambient[1] = 0.8;          Ambient[2] = 0.8;
+        Ambient[0] = 0.8;        Ambient[1] = 0.8;          Ambient[2] = 0.8;
         Diffuse[0] = 1;          Diffuse[1] = 1;          Diffuse[2] = 1;
         //Disable Lighting
-        glDisable(GL_LIGHT1);     
-//        glDisable(GL_LIGHT2);     
-//        glDisable(GL_LIGHT3);     
-//        glDisable(GL_LIGHT4);     
-//        glDisable(GL_LIGHT5);     
-//        glDisable(GL_LIGHT6);     
+        glDisable(GL_LIGHT1); 
+		   
      }     
      else{
 		//Setting For Night
@@ -638,11 +550,9 @@ void setLighting(){
 			
 			//First
 			float ligthStand1[4] = {-15,3,10, 1.0};
-			float direction[3] = {0.0,-1.0,0.0};
+//			float direction[3] = {0.0,-1.0,0.0};
 			
 			glLightfv(GL_LIGHT1,GL_POSITION,ligthStand1);
-			//glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,20);
-			//glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,direction);
 			
 			glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION ,at0/100.0);              
 			glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION   ,at1/100.0);
@@ -1386,7 +1296,7 @@ static void centerDessert() {
 }
 
 /* Enemy*/
-void control(int direction){
+void enemyControl(int direction){
      int degrees ,rotates, turn;
      
      switch(direction){
@@ -1422,34 +1332,31 @@ void carEnemy(){
      int i;
 
      if(step >= 9 && step < 12){
-             control(4);                  
-//             carMove = 70;              //speed
+             enemyControl(4);                  
+//             carMove = 70;              //for speed
      }  
      else if(step >= 69 && step < 72){
-             control(4);
-//             carMove = 70;                  //speed
+             enemyControl(4);
+//             carMove = 70;              //for speed
      }
      else if(step >= 84 && step < 92){
-             control(4);
-//             carMove = 70;                  //speed
+             enemyControl(4);
+//             carMove = 70;              //for speed
      }
      else if(step >= 154 && step < 158){
-             control(4);
-//             carMove = 70;                  //speed
+             enemyControl(4);
+//             carMove = 70;              //for speed
      }
      else if(step >= 179 && step < 185){
-             control(4);
-  //           carMove = 70;                               //speed
+             enemyControl(4);
+//             carMove = 70;              //for speed
      }
      else if(step == 190)
             step = 0;
      else{
-        control(1);
-//        carMove = 30;
-     }
-   
-     printf("%d\n", step);      
-
+        enemyControl(1);
+//             carMove = 30;              //for speed
+     } 
 }
 
 void drawPillar(){
@@ -1496,11 +1403,53 @@ void timer(int miliseconds) {
 	glutTimerFunc(carMove, timer, 0);
 }
 
+void startLamp() {
+   //  Save transformation
+   glPushMatrix();
+
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   float radScale = 0.03;
+   float baseRadScale = 0.05;
+   float capRadScale = 0.01;
+   float outerRadScale = 0.08;
+
+   //Light
+   float em[4] = {0.8, 0.8, 0.1, 1.0};
+   glMaterialf(GL_FRONT,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT,GL_SPECULAR,em);
+   glMaterialfv(GL_FRONT,GL_EMISSION,em);
+	glEnable(GL_TEXTURE_2D);
+	    glBindTexture(GL_TEXTURE_2D,_textureGlass);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					
+		house(-10,0,18.5,0.3,0.3,0.3,0);
+		house(-10,0,13.5,0.3,0.3,0.3,0);
+     glDisable(GL_TEXTURE_2D);
+	   
+	
+	   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+	   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+	   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   //Undo transformations
+   glPopMatrix();
+}
+
+
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
 void display()
 {
+   // Lighting ============================================================================================================
+
    //  Erase the window and the depth buffer
    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
    //  Enable Z-buffering in OpenGL
@@ -1534,7 +1483,8 @@ void display()
    glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
    glLightfv(GL_LIGHT0,GL_POSITION,Position);
 
-   //  Perspective - set eye position
+   // Perspective ==========================================================================================================
+   // set eye position
    if (mode)
    {
       double Ex = -2*dim*Sin(th)*Cos(ph);
@@ -1555,13 +1505,12 @@ void display()
            gluLookAt(-8+carXIncrement, 1 ,15.2+carZIncrement , -23.78963+carXIncrement, refY ,15.258857+carZIncrement, 0,1,0);  
    }
    
+   // Draw scene ===========================================================================================================
    
-   //  Draw scene =========================================================================================================
-   
-   //  ====================================================================================Skybox
+   // ===================================================================================Skybox
    skybox(70);
    
-   //  ====================================================================================Dessert
+   // ===================================================================================Dessert
    dessert(0,Y_CENTER-0.1,0,30);
     
     glEnable(GL_TEXTURE_2D);
@@ -1573,9 +1522,9 @@ void display()
 	
     glDisable(GL_TEXTURE_2D);
     
-    //====================================================================================Brown house
+    // ===================================================================================Brown house
 	glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureBrownBrick);
+        glBindTexture(GL_TEXTURE_2D, _textureBrick);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		
@@ -1587,53 +1536,15 @@ void display()
 
     glDisable(GL_TEXTURE_2D);
     
-    // =========================================================================fence
+    // ====================================================================================Start Lamp
+    startLamp();
     
-    
-   //  Save transformation
-   glPushMatrix();
-
-   //  Set specular color to white
-   float white[] = {1,1,1,1};
-   float black[] = {0,0,0,1};
-   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
-   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
-   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
-
-   float radScale = 0.03;
-   float baseRadScale = 0.05;
-   float capRadScale = 0.01;
-   float outerRadScale = 0.08;
-
-   //Light
-   float em[4] = {0.8, 0.8, 0.1, 1.0};
-   glMaterialf(GL_FRONT,GL_SHININESS,0);
-   glMaterialfv(GL_FRONT,GL_SPECULAR,em);
-   glMaterialfv(GL_FRONT,GL_EMISSION,em);
-	glEnable(GL_TEXTURE_2D);
-	   glBindTexture(GL_TEXTURE_2D,_textureGlass);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					
-					house(-10,0,18.5,0.3,0.3,0.3,0);
-					
-					house(-10,0,13.5,0.3,0.3,0.3,0);
-			    glDisable(GL_TEXTURE_2D);
-	   
-	
-	   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
-	   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
-	   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
-
-   //Undo transformations
-   glPopMatrix();
-
-    
-    // ======================================================================================center dessert	
+    // ====================================================================================Center dessert	
 	centerDessert();
     
-    //Pillar
-    drawPillar();
+    // ====================================================================================Pillar
+    //First Pillar
+	drawPillar();
     
     //Second Pillar
     glPushMatrix();
@@ -1642,15 +1553,13 @@ void display()
         drawPillar();
     glPopMatrix();
 
-   
-    //======================================================================================Pyramid
+    // ====================================================================================Pyramid
 	glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		
 		pyramid(-8,Y_CENTER+2.5,7.5,3,3,3,0); // center
-//		cube(-8,6,7.5,0.2,0.2,0.2, 0);
 		
 		pyramid(15,Y_CENTER+1.5,15,2,2,2,0); //top right
 		pyramid(11,Y_CENTER+1,18,1,1,1,0);
@@ -1660,16 +1569,16 @@ void display()
     glDisable(GL_TEXTURE_2D);  
    
     		
-//============================================================================================day
+    // ====================================================================================Day Mode
    
-   //Light
-   float redEm[4] = {1,1,1,1};
-   glMaterialf(GL_FRONT,GL_SHININESS,0);
-   glMaterialfv(GL_FRONT,GL_SPECULAR,redEm);
-   glMaterialfv(GL_FRONT,GL_EMISSION,redEm);
-   glColor3f(0.5, 0, 0);
+	//Light
+	float redEm[4] = {1,1,1,1};
+	glMaterialf(GL_FRONT,GL_SHININESS,0);
+	glMaterialfv(GL_FRONT,GL_SPECULAR,redEm);
+	glMaterialfv(GL_FRONT,GL_EMISSION,redEm);
+	glColor3f(0.5, 0, 0);
    
-//============================================================================================car
+    // ====================================================================================Car
     /* Opponent's Car*/
     glPushMatrix();
     	glTranslated(0,1.2,0);                               
@@ -1682,11 +1591,10 @@ void display()
 		car(-8+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, 180+carRotate, 1,0,0);
     glPopMatrix();
     
-//============================================================================================start line
-    
+    // ====================================================================================Start line
 	startLine();
     
-//============================================================================================set lighting
+    // ====================================================================================Set lighting
     setLighting();
    
    glutSwapBuffers();
@@ -1700,7 +1608,6 @@ void idle()
    //  Tell GLUT it is necessary to redisplay the scene
    glutPostRedisplay();
 }
-
 
 void personControl(int direction){
      int degree ,rotate, turn;
