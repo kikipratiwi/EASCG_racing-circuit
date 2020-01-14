@@ -17,7 +17,7 @@
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F
 
-#define ANGLE_TURN 6
+#define ANGLE_TURN 12
 #define Y_CENTER -0.13
 
 #define ROAD_WIDTH 2
@@ -326,8 +326,52 @@ static void support(double x, double y, double z)
    glPopMatrix();
 }
 
+static void quadsNoRepeateTexture(double x,double z) 
+{
+   glPushMatrix();
+   		glScaled(0.5,1,0.5);
+   		glTranslated(x,-0.8,z);
+	   glBegin(GL_QUADS);
+		   glTexCoord2f(0.0,0.0); glVertex3f(-1,+1,+1);
+		   glTexCoord2f(1,0.0); glVertex3f(+1,+1,+1);
+		   glTexCoord2f(1,1); glVertex3f(+1,+1,-1);
+		   glTexCoord2f(0.0,1); glVertex3f(-1,+1,-1);
+	   glEnd();
+   glPopMatrix();                   	
+}
 
-	
+static void startLine(){
+	glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureStartLine);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   		
+   		   glDisable(GL_POLYGON_OFFSET_FILL);
+
+		   //  Set specular color to white
+		   float white[] = {1,1,1,1};
+		   float black[] = {0,0,0,1};
+		   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0);
+		   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+		   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+		   
+		   glColor3f(0.7, 0.7, 0.7);
+		   
+   			quadsNoRepeateTexture(-20,29.22);
+   			quadsNoRepeateTexture(-20,31.22);
+   			quadsNoRepeateTexture(-20,33.22);
+   			
+   			glPushMatrix();
+   				glTranslated(-27,0,7.12);
+		   		glRotated(90,0,1,0);
+   				quadsNoRepeateTexture(-20,34.22);
+   			glPopMatrix(); 
+		   
+		      
+    glDisable(GL_TEXTURE_2D);
+}
+
+
 static void quads(double x,double y,double z,
                  double dx,double dy,double dz,
                  double th)
@@ -1214,10 +1258,13 @@ void display()
       refZ = (dim * -Cos(thf)) + fpZ + carZIncrement;
       printf("%f\n", refY);
    
-      glRotated(-carRotate,0,1,0);      
-//    	glTranslated(-11,1.1,13);
-         gluLookAt(-13+carXIncrement, 1.2 ,15+carZIncrement , 12.210370+carXIncrement,refY,15.058857+carZIncrement, 0,1,0);  
+      glRotated(-carRotate,0,1,0);   
+         gluLookAt(-14+carXIncrement, 1.3 ,15+carZIncrement , 12.210370+carXIncrement,refY,15.058857+carZIncrement, 0,1,0);  
+//         cube(-13+carXIncrement,2,15+carZIncrement,0.2,0.2,0.2, 0);
+         cube(12.210370+carXIncrement,refY,15.058857+carZIncrement,0.2,0.2,0.2, 0);
    }
+   
+   
 
    //  Draw scene =========================================================================================================
    //  Skybox
@@ -1303,29 +1350,18 @@ void display()
 //============================================================================================end of day
     /* Opponent's Car*/
     glPushMatrix();
-    	glTranslated(-13,1.2,15);                               
-		car(-1+centerXIncrement, -1 ,2+centerZIncrement, 1,1,1, carRotate2, 0,0,0);
+    	glTranslated(0,1.2,0);                               
+		car(-11.5+centerXIncrement, -1 ,16.7+centerZIncrement, 1,1,1, carRotate2, 0,0,0);
     glPopMatrix();
     
     /* Controlled Car */
     glPushMatrix();
     	glTranslated(0,1.2,0);
-		car(-12+carXIncrement, -1 ,15+carZIncrement, 1,1,1, carRotate, 1,0,0);
+		car(-13+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, carRotate, 1,0,0);
     glPopMatrix();
     
     /* Start Line */
-	glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureStartLine);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   		
-   		   glColor3f(0.7, 0.7, 0.7);
-   		   
-   		   glPushMatrix();
-   		   		glScaled(5,5,5);
-		   		quads(-10,Y_CENTER+0.3,16,0.1,0.1,0.1,0);
-		   glPopMatrix();
-    glDisable(GL_TEXTURE_2D);  
+	startLine();
     
     setLighting();
    
