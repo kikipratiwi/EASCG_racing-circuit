@@ -1552,7 +1552,7 @@ void display()
       refZ = (dim * -Cos(thf)) + fpZ + carZIncrement;
    
       glRotated(-carRotate,0,1,0);   
-           gluLookAt(-12+carXIncrement, 1 ,15.2+carZIncrement , -3.78963+carXIncrement, refY ,15.258857+carZIncrement, 0,1,0);  
+           gluLookAt(-8+carXIncrement, 1 ,15.2+carZIncrement , -23.78963+carXIncrement, refY ,15.258857+carZIncrement, 0,1,0);  
    }
    
    
@@ -1679,7 +1679,7 @@ void display()
     /* Controlled Car */
     glPushMatrix();
     	glTranslated(0,1.2,0);
-		car(-12+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, carRotate, 1,0,0);
+		car(-8+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, 180+carRotate, 1,0,0);
     glPopMatrix();
     
 //============================================================================================start line
@@ -1707,20 +1707,20 @@ void personControl(int direction){
      
      switch(direction){
         case 1:
-             degree = 0;             rotate = 1;             turn = 0;    
+             degree = 0;             rotate = -1;             turn = 0;             
              
              break;                  
              
         case 2:
-             degree = 0;             rotate = -1;             turn = 0;             
+             degree = 0;             rotate = 1;             turn = 0;    
              break;
              
         case 3:
-             degree = -ANGLE_TURN;    rotate = 1;              turn = -ANGLE_TURN;
+             degree = -ANGLE_TURN;    rotate = -1;              turn = -ANGLE_TURN;
              break;
              
         default :
-             degree = ANGLE_TURN;    rotate = 1;              turn = ANGLE_TURN;
+             degree = ANGLE_TURN;    rotate = -1;              turn = ANGLE_TURN;
              break;   
      }  
         temp = carRotateX;
