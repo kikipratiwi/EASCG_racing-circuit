@@ -17,7 +17,7 @@
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F
 
-#define ANGLE_TURN 12
+#define ANGLE_TURN 15
 #define Y_CENTER -0.13
 
 #define ROAD_WIDTH 2
@@ -83,6 +83,9 @@ float temp;
 
 //Race
 int start = 0;
+int step = 0 ;
+    //manipulate speed
+    int carMove = 70;
 
 //Texture Variables
 int tMode = 0;
@@ -1368,6 +1371,82 @@ static void centerDessert() {
 	glDisable(GL_TEXTURE_2D);
 }
 
+/* Enemy*/
+void control(int direction){
+     int degrees ,rotates, turn;
+     
+     switch(direction){
+        case 1:
+             degrees = 0;             rotates = 1;             turn = 0;      
+             step++;  
+             break;                  
+             
+        case 2:
+             degrees = 0;             rotates = -1;             turn = 0;             
+             break;
+             
+        case 3:
+             degrees = -ANGLE_TURN;    rotates = 1;              turn = -ANGLE_TURN;
+             step++;
+             break;
+             
+        default :
+             degrees = ANGLE_TURN;    rotates = 1;              turn = ANGLE_TURN;
+             step++;
+             break;   
+     }
+     
+        temp = xRotate;
+        xRotate = xRotate*Cos(degrees) + zRotate * Sin(degrees);
+        zRotate = -temp*Sin(degrees)+zRotate*Cos(degrees);
+        centerXIncrement += (xRotate * rotates);
+        centerZIncrement += (zRotate * rotates);
+        carRotate2 += turn;  
+}
+
+void carEnemy(){
+     int i;
+
+     if(step >= 9 && step < 12){
+             control(4);                  
+//             carMove = 70;              speed
+     }  
+     else if(step >= 69 && step < 72){
+             control(4);
+//             carMove = 70;                  speed
+     }
+     else if(step >= 84 && step < 92){
+             control(4);
+//             carMove = 70;                  speed
+     }
+     else if(step >= 154 && step < 158){
+             control(4);
+//             carMove = 70;                  speed
+     }
+     else if(step >= 179 && step < 185){
+             control(4);
+  //           carMove = 70;                               speed
+     }
+     else if(step == 190)
+            step = 0;
+     else{
+        control(1);
+//        carMove = 30;
+     }
+   
+     printf("%d\n", step);      
+
+}
+
+void timer(int miliseconds) {
+     
+   	if(start)
+        carEnemy();
+	
+	glutPostRedisplay();
+	glutTimerFunc(carMove, timer, 0);
+}
+
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
@@ -1418,13 +1497,13 @@ void display()
    //  First Person
    else
    {
+      ph =0;
       refX = ((dim * Sin(thf)) + fpX ) + carXIncrement;     
       refY = (dim * Sin(ph))+ fpY;
       refZ = (dim * -Cos(thf)) + fpZ + carZIncrement;
-      printf("%f\n", refY);
    
       glRotated(-carRotate,0,1,0);   
-         gluLookAt(-14+carXIncrement, 1.3 ,15+carZIncrement , 12.210370+carXIncrement,refY,15.058857+carZIncrement, 0,1,0);  
+           gluLookAt(-12+carXIncrement, 1 ,15.2+carZIncrement , -3.78963+carXIncrement, refY ,15.258857+carZIncrement, 0,1,0);  
 //         cube(-13+carXIncrement,2,15+carZIncrement,0.2,0.2,0.2, 0);
          cube(12.210370+carXIncrement,refY,15.058857+carZIncrement,0.2,0.2,0.2, 0);
    }
@@ -1564,13 +1643,13 @@ void display()
     /* Opponent's Car*/
     glPushMatrix();
     	glTranslated(0,1.2,0);                               
-		car(-11.5+centerXIncrement, -1 ,16.7+centerZIncrement, 1,1,1, carRotate2, 0,0,0);
+		car(-12+centerXIncrement, -1 ,16.7+centerZIncrement, 1,1,1, carRotate2, 0,0,0);
     glPopMatrix();
     
     /* Controlled Car */
     glPushMatrix();
     	glTranslated(0,1.2,0);
-		car(-13+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, carRotate, 1,0,0);
+		car(-12+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, carRotate, 1,0,0);
     glPopMatrix();
     
     /* Start Line */
@@ -1590,12 +1669,14 @@ void idle()
    glutPostRedisplay();
 }
 
+
 void personControl(int direction){
      int degree ,rotate, turn;
      
      switch(direction){
         case 1:
-             degree = 0;             rotate = 1;             turn = 0;                  
+             degree = 0;             rotate = 1;             turn = 0;    
+             
              break;                  
              
         case 2:
@@ -1615,8 +1696,8 @@ void personControl(int direction){
         carRotateZ = -temp*Sin(degree)+carRotateZ*Cos(degree);
         carXIncrement += (carRotateX * rotate);
         carZIncrement += (carRotateZ * rotate);
-        
-        carRotate += turn;  
+                
+        carRotate += turn;          
 }
 
 /*
@@ -1722,6 +1803,7 @@ int main(int argc,char* argv[])
    glutReshapeFunc(reshape);
    glutSpecialFunc(special);
    glutKeyboardFunc(key);
+   glutTimerFunc(carMove, timer, 0);
    
    // load the texture
    initTexture();
