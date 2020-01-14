@@ -1438,6 +1438,41 @@ void carEnemy(){
 
 }
 
+void drawPillar(){
+     //Pillar
+   float i, gap=2.1, nPillar=6.0;
+   for(i=0; i<(gap*nPillar); i=i+gap) {
+		pillar(-13.5,-1,3+i,15,8,15,0);
+   }
+   
+   nPillar=9.0;
+   for(i=0; i<(gap*nPillar); i=i+gap) {
+		pillar(-18.5,-1,0.5+i,15,8,15,0);
+   }
+   
+    glEnable(GL_TEXTURE_2D);
+	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    
+   		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
+   		cube(-13.5,3.3,6.1,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,8.2,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,10.3,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,12.6,0.5,0.3,1.25,0);
+   		
+   		cube(-18.5,3.3,1.3,0.5,0.3,1.25,0);
+   		cube(-18.5,3.3,3.6,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,5.7,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,7.8,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,9.9,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,12.0,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,14.1,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,16.4,0.5,0.3,1.25,0);
+   		
+    glDisable(GL_TEXTURE_2D);     
+}
+
 void timer(int miliseconds) {
      
    	if(start)
@@ -1580,38 +1615,16 @@ void display()
     // center dessert	
 	centerDessert();
     
+    //Pillar
+    drawPillar();
+    
+    //Second Pillar
+    glPushMatrix();
+        glRotated(135, 0,1,0);
+        glTranslated(9.2 ,0,-3);
+        drawPillar();
+    glPopMatrix();
 
-   float i, gap=2.1, nPillar=6.0;
-   for(i=0; i<(gap*nPillar); i=i+gap) {
-		pillar(-13.5,-1,3+i,15,8,15,0);
-   }
-   
-   nPillar=9.0;
-   for(i=0; i<(gap*nPillar); i=i+gap) {
-		pillar(-18.5,-1,0.5+i,15,8,15,0);
-   }
-   
-    glEnable(GL_TEXTURE_2D);
-	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	    
-   		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
-   		cube(-13.5,3.3,6.1,0.5,0.3,1.,0);
-   		cube(-13.5,3.3,8.2,0.5,0.3,1.,0);
-   		cube(-13.5,3.3,10.3,0.5,0.3,1.,0);
-   		cube(-13.5,3.3,12.6,0.5,0.3,1.25,0);
-   		
-   		cube(-18.5,3.3,1.3,0.5,0.3,1.25,0);
-   		cube(-18.5,3.3,3.6,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,5.7,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,7.8,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,9.9,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,12.0,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,14.1,0.5,0.3,1.,0);
-   		cube(-18.5,3.3,16.4,0.5,0.3,1.25,0);
-   		
-    glDisable(GL_TEXTURE_2D);
    
     //Pyramid
 	glEnable(GL_TEXTURE_2D);
