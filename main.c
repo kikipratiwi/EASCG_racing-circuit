@@ -17,7 +17,7 @@
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F
 
-#define ANGLE_TURN 12
+#define ANGLE_TURN 15
 #define Y_CENTER -0.13
 
 #define ROAD_WIDTH 2
@@ -1253,13 +1253,15 @@ void display()
    //  First Person
    else
    {
+      ph =0;
       refX = ((dim * Sin(thf)) + fpX ) + carXIncrement;     
       refY = (dim * Sin(ph))+ fpY;
       refZ = (dim * -Cos(thf)) + fpZ + carZIncrement;
       printf("%f\n", refY);
    
       glRotated(-carRotate,0,1,0);   
-         gluLookAt(-14+carXIncrement, 1.3 ,15+carZIncrement , 12.210370+carXIncrement,refY,15.058857+carZIncrement, 0,1,0);  
+           gluLookAt(-11.5+carXIncrement, 1 ,15.2+carZIncrement , -3.78963+carXIncrement, refY ,15.258857+carZIncrement, 0,1,0);  
+//           gluLookAt(-11.5+carXIncrement, 1 ,16.7+carZIncrement , -3.78963+carXIncrement, refY ,16.58857+carZIncrement, 0,1,0);  
 //         cube(-13+carXIncrement,2,15+carZIncrement,0.2,0.2,0.2, 0);
          cube(12.210370+carXIncrement,refY,15.058857+carZIncrement,0.2,0.2,0.2, 0);
    }
@@ -1357,7 +1359,7 @@ void display()
     /* Controlled Car */
     glPushMatrix();
     	glTranslated(0,1.2,0);
-		car(-13+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, carRotate, 1,0,0);
+		car(-11.5+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, carRotate, 1,0,0);
     glPopMatrix();
     
     /* Start Line */
