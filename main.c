@@ -100,20 +100,11 @@ float Diffuse[]   = {1.0,1.0,1.0,1.0};
 float Specular[]  = {0,0,0,1.0};
 
 GLuint	_textureBasicMetal, _textureGlass, _textureWheel, _textureTire,
-		_textureWoodFence, _textureGrass, _textureCinderBlock, _textureCarGrill, 
-		_textureHeadLamp, _textureCarbonFiber, _textureSidewalk, 
-		_textureGarageDoor, _textureWalkway, _textureHedge, _textureGreyBrick, 
-		_textureWoodBeam, _textureFrontDoor2, _textureWindow1, _textureSkyboxFront, 
+		_textureCarGrill, _textureCarbonFiber, _textureSkyboxFront, 
 		_textureSkyboxBack, _textureSkyboxRight, _textureSkyboxLeft, _textureSkyboxTop, 
-		_textureAsphalt, _textureBrownBrick, _textureWhiteBrick, _textureMetalRoof, 
-		_textureWarehouseWindow, _textureSupport;
+		_textureAsphalt, _textureWhiteBrick, _textureHeadLamp;
 
-GLuint	_textureBrick, _textureFence, _textureStone, _textureConcrete, 
-		_textureOrangeConcrete, _textureDirt, _texturePebble, _textureCeiling,
-		_textureDiffuse, _textureDoor, _textureGrass, _textureRoof, _textureWindow;   
-		
-GLuint	_textureSand, _textureYellowBrick, _textureStartLine, _textureSand2,
-		_textureHexagonStone;
+GLuint	_textureBrick, _textureSand, _textureYellowBrick, _textureStartLine, _textureSand2;
 
 int refreshMills = 15;
 unsigned int ID;
@@ -129,30 +120,15 @@ void initTexture() {
 	_textureSkyboxLeft = LoadTexBMP("texture/skybox-left.bmp");
 	_textureSkyboxTop = LoadTexBMP("texture/skybox-top.bmp");
 
-	_textureBrownBrick = LoadTexBMP("texture/brown-brick.bmp");
-
-
-	// _textureGrass = LoadTexBMP("texture/grass.bmp");
 	_textureBrick = LoadTexBMP("texture/bricks.bmp");
-	// _textureRoof = LoadTexBMP("texture/roof.bmp");
-	// _textureDoor = LoadTexBMP("texture/front-door-2.bmp");
-	// _textureWindow = LoadTexBMP("texture/window-1.bmp");
-	// _textureFence = LoadTexBMP("texture/fence.bmp");
-	// _textureStone = LoadTexBMP("texture/stone.bmp");
-	// _textureConcrete = LoadTexBMP("texture/concrete.bmp");
-	// _textureOrangeConcrete = LoadTexBMP("texture/concrete-orange.bmp");
-	// _textureDirt = LoadTexBMP("texture/sidewalk.bmp");
-	// _texturePebble = LoadTexBMP("texture/pebble.bmp");
-	// _textureCeiling = LoadTexBMP("texture/ceiling.bmp");
-	// _textureDiffuse = LoadTexBMP("texture/diffuse.bmp");
-	
-	_textureSand = LoadTexBMP("texture/sand.bmp");   
 	_textureYellowBrick = LoadTexBMP("texture/yellow-brick.bmp");   
 	
-	_textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
-	_textureStartLine = LoadTexBMP("texture/start-line.bmp");
+	_textureSand = LoadTexBMP("texture/sand.bmp");   
 	_textureSand2 = LoadTexBMP("texture/sand-2.bmp");
+	
+	_textureStartLine = LoadTexBMP("texture/start-line.bmp");
 
+	_textureAsphalt = LoadTexBMP("texture/asphalt.bmp");
 	_textureBasicMetal = LoadTexBMP("texture/basic-metal.bmp");
 	_textureGlass = LoadTexBMP("texture/glass.bmp");
     _textureWheel = LoadTexBMP("texture/car-wheel.bmp");
@@ -160,9 +136,6 @@ void initTexture() {
 	_textureCarGrill = LoadTexBMP("texture/car-grill.bmp");
 	_textureHeadLamp = LoadTexBMP("texture/headlamp.bmp");
 	_textureCarbonFiber = LoadTexBMP("texture/carbon-fiber.bmp");
-	_textureGreyBrick = LoadTexBMP("texture/grey-brick.bmp");
-	_textureWoodBeam = LoadTexBMP("texture/wood-beam.bmp");
-	_textureMetalRoof = LoadTexBMP("texture/metal-roof.bmp");
 }
 
 static void cube(double x,double y,double z,
