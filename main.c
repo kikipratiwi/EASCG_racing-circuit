@@ -1308,21 +1308,33 @@ void display()
    for(i=0; i<(gap*nPillar); i=i+gap) {
 		pillar(-13.5,-1,3+i,15,8,15,0);
    }
+   
+   nPillar=9.0;
+   for(i=0; i<(gap*nPillar); i=i+gap) {
+		pillar(-18.5,-1,0.5+i,15,8,15,0);
+   }
+   
     glEnable(GL_TEXTURE_2D);
 	    glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	    
    		cube(-13.5,3.3,3.8,0.5,0.3,1.25,0);
-   		cube(-13.5,3.3,6.5,0.5,0.3,1.,0);
-   		cube(-13.5,3.3,9,0.5,0.3,1.25,0);
+   		cube(-13.5,3.3,6.1,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,8.2,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,10.3,0.5,0.3,1.,0);
+   		cube(-13.5,3.3,12.6,0.5,0.3,1.25,0);
+   		
+   		cube(-18.5,3.3,1.3,0.5,0.3,1.25,0);
+   		cube(-18.5,3.3,3.6,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,5.7,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,7.8,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,9.9,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,12.0,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,14.1,0.5,0.3,1.,0);
+   		cube(-18.5,3.3,16.4,0.5,0.3,1.25,0);
    		
     glDisable(GL_TEXTURE_2D);
-   
-//   nPillar=9.0;
-//   for(i=0; i<(gap*nPillar); i=i+gap) {
-//		pillar(-18.5,-1,0.5+i,15,8,15,0);
-//   }
    
     //Pyramid
 	glEnable(GL_TEXTURE_2D);
@@ -1335,6 +1347,9 @@ void display()
 		
 		pyramid(15,Y_CENTER+1.5,15,2,2,2,0);
 		pyramid(11,Y_CENTER+1,18,1,1,1,0);
+		
+		pyramid(-15,Y_CENTER+1.5,-15,2,2,2,0);
+		pyramid(-11,Y_CENTER+1,-18,1,1,1,0);
     glDisable(GL_TEXTURE_2D);  
    
     		
