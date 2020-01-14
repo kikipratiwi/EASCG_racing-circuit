@@ -1409,23 +1409,23 @@ void carEnemy(){
 
      if(step >= 9 && step < 12){
              control(4);                  
-//             carMove = 70;              speed
+//             carMove = 70;              //speed
      }  
      else if(step >= 69 && step < 72){
              control(4);
-//             carMove = 70;                  speed
+//             carMove = 70;                  //speed
      }
      else if(step >= 84 && step < 92){
              control(4);
-//             carMove = 70;                  speed
+//             carMove = 70;                  //speed
      }
      else if(step >= 154 && step < 158){
              control(4);
-//             carMove = 70;                  speed
+//             carMove = 70;                  //speed
      }
      else if(step >= 179 && step < 185){
              control(4);
-  //           carMove = 70;                               speed
+  //           carMove = 70;                               //speed
      }
      else if(step == 190)
             step = 0;
@@ -1560,22 +1560,46 @@ void display()
     glDisable(GL_TEXTURE_2D);
     
     // fence
-    glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureConcrete);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		
-		house(-10,0,19.5,0.3,0.3,0.3,0);
-		
-    glDisable(GL_TEXTURE_2D);
     
-    glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureDiffuse);
+    
+   //  Save transformation
+   glPushMatrix();
+
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float black[] = {0,0,0,1};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   float radScale = 0.03;
+   float baseRadScale = 0.05;
+   float capRadScale = 0.01;
+   float outerRadScale = 0.08;
+
+   //Light
+   float em[4] = {0.8, 0.8, 0.1, 1.0};
+   glMaterialf(GL_FRONT,GL_SHININESS,0);
+   glMaterialfv(GL_FRONT,GL_SPECULAR,em);
+   glMaterialfv(GL_FRONT,GL_EMISSION,em);
+	glEnable(GL_TEXTURE_2D);
+	   glBindTexture(GL_TEXTURE_2D,_textureGlass);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		
-		house(-9,0,19.5,0.3,0.3,0.3,0);
-    glDisable(GL_TEXTURE_2D);
+					
+					house(-10,0,18.5,0.3,0.3,0.3,0);
+					
+					house(-10,0,13.5,0.3,0.3,0.3,0);
+			    glDisable(GL_TEXTURE_2D);
+	   
+	
+	   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+	   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+	   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,black);
+
+   //Undo transformations
+   glPopMatrix();
+
     
     // center dessert	
 	centerDessert();
