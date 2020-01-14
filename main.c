@@ -1482,11 +1482,19 @@ void display()
     
     // fence
     glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureOrangeConcrete);
+        glBindTexture(GL_TEXTURE_2D, _textureConcrete);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		
 		house(-10,0,19.5,0.3,0.3,0.3,0);
+		
+    glDisable(GL_TEXTURE_2D);
+    
+    glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, _textureDiffuse);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
 		house(-9,0,19.5,0.3,0.3,0.3,0);
     glDisable(GL_TEXTURE_2D);
     
