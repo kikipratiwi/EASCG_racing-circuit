@@ -1504,40 +1504,16 @@ void display()
    
       glRotated(-carRotate,0,1,0);   
            gluLookAt(-12+carXIncrement, 1 ,15.2+carZIncrement , -3.78963+carXIncrement, refY ,15.258857+carZIncrement, 0,1,0);  
-//         cube(-13+carXIncrement,2,15+carZIncrement,0.2,0.2,0.2, 0);
-         cube(12.210370+carXIncrement,refY,15.058857+carZIncrement,0.2,0.2,0.2, 0);
    }
    
    
-
    //  Draw scene =========================================================================================================
-   //  Skybox
+   
+   //  ====================================================================================Skybox
    skybox(70);
    
-   //  Sand
+   //  ====================================================================================Dessert
    dessert(0,Y_CENTER-0.1,0,30);
-   
-   //PitStop
-//   pitstop(1, 0, -10);   
-//   pitstop(5, 0, -10);
-
-	glEnable(GL_TEXTURE_2D);
-	    glBindTexture(GL_TEXTURE_2D, _textureConcrete);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-//		quads(0,0,0,30,Y_CENTER+0.1,1,0);
-	
-    glDisable(GL_TEXTURE_2D);
-			
-	glEnable(GL_TEXTURE_2D);
-	    glBindTexture(GL_TEXTURE_2D, _textureOrangeConcrete);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-//		quads(0,0,0,1,Y_CENTER+0.1,30,0);
-	
-    glDisable(GL_TEXTURE_2D);
     
     glEnable(GL_TEXTURE_2D);
 	    glBindTexture(GL_TEXTURE_2D, _textureAsphalt);
@@ -1548,18 +1524,21 @@ void display()
 	
     glDisable(GL_TEXTURE_2D);
     
-    //Brown house
+    //====================================================================================Brown house
 	glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, _textureBrick);
+        glBindTexture(GL_TEXTURE_2D, _textureBrownBrick);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		
 		house(-17,0,19.5,1,1,1,0);
 		house(-14,0,19.5,1,1,1,0);
+		
+		house(-14.2,0,-3.6,1,1,1,30);
+		house(-17,0,-2,1,1,1,30);
 
     glDisable(GL_TEXTURE_2D);
     
-    // fence
+    // =========================================================================fence
     
     
    //  Save transformation
@@ -1601,7 +1580,7 @@ void display()
    glPopMatrix();
 
     
-    // center dessert	
+    // ======================================================================================center dessert	
 	centerDessert();
     
 
@@ -1637,7 +1616,7 @@ void display()
    		
     glDisable(GL_TEXTURE_2D);
    
-    //Pyramid
+    //======================================================================================Pyramid
 	glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, _textureYellowBrick);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1663,7 +1642,7 @@ void display()
    glMaterialfv(GL_FRONT,GL_EMISSION,redEm);
    glColor3f(0.5, 0, 0);
    
-//============================================================================================end of day
+//============================================================================================car
     /* Opponent's Car*/
     glPushMatrix();
     	glTranslated(0,1.2,0);                               
@@ -1676,9 +1655,11 @@ void display()
 		car(-12+carXIncrement, -1 ,15.2+carZIncrement, 1,1,1, carRotate, 1,0,0);
     glPopMatrix();
     
-    /* Start Line */
+//============================================================================================start line
+    
 	startLine();
     
+//============================================================================================set lighting
     setLighting();
    
    glutSwapBuffers();
