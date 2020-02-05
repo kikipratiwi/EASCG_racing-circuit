@@ -2,7 +2,7 @@
 
 A simple C application with GLUT (OpenGL Utility Toolkit) to animate car on the racing circuit  
 
-## Prequisites
+## Prerequisites
 
 1. Dev-C++ `4.9.9.2`. You can download from this [link](https://sourceforge.net/projects/dev-cpp/files/Binaries/Dev-C%2B%2B%204.9.9.2/).
 
