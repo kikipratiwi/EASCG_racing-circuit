@@ -25,6 +25,18 @@ Toggles first person/perspective projection:
 p
 ```
 
+Toggle day/night mode:
+
+```console
+c
+```
+
+Move red car:
+
+```console
+a/s/d/w
+```
+
 Change view angle:
 
 ```console
@@ -35,6 +47,12 @@ Zoom in and out (in perspective view):
 
 ```console
 PgDn/PgUp 
+```
+
+Zoom in and out (in first person view):
+
+```console
+-/+ 
 ```
 
 Exit the program:
