@@ -25,6 +25,12 @@ Toggles first person/perspective projection:
 p
 ```
 
+Toggle day/night mode:
+
+```console
+c
+```
+
 Move red car:
 
 ```console
